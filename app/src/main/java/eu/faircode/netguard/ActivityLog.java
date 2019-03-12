@@ -62,8 +62,8 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
     private static final String TAG = "NetGuard.Log";
 
     private boolean running = false;
-    private ListView lvLog;
-    private AdapterLog adapter;
+    //private ListView lvLog;
+    //private AdapterLog adapter;
     //private MenuItem menuSearch = null;
 
     private boolean live;
@@ -74,7 +74,7 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
 
     private static final int REQUEST_PCAP = 1;
 
-    private DatabaseHelper.LogChangedListener listener = new DatabaseHelper.LogChangedListener() {
+    /*private DatabaseHelper.LogChangedListener listener = new DatabaseHelper.LogChangedListener() {
         @Override
         public void onChanged() {
             runOnUiThread(new Runnable() {
@@ -85,7 +85,7 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
             });
         }
     };
-
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Util.setTheme(this);
@@ -110,8 +110,8 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
         boolean log = prefs.getBoolean("log", false);
 
         // Show disabled message
-        TextView tvDisabled = findViewById(R.id.tvDisabled);
-        tvDisabled.setVisibility(log ? View.GONE : View.VISIBLE);
+//        TextView tvDisabled = findViewById(R.id.tvDisabled);
+//        tvDisabled.setVisibility(log ? View.GONE : View.VISIBLE);
 
         // Set enabled switch
         swEnabled.setChecked(log);
@@ -124,22 +124,22 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
         // Listen for preference changes
         prefs.registerOnSharedPreferenceChangeListener(this);
 
-        lvLog = findViewById(R.id.lvLog);
+        //lvLog = findViewById(R.id.lvLog);
 
-        boolean udp = prefs.getBoolean("proto_udp", true);
-        boolean tcp = prefs.getBoolean("proto_tcp", true);
-        boolean other = prefs.getBoolean("proto_other", true);
-        boolean allowed = prefs.getBoolean("traffic_allowed", true);
-        boolean blocked = prefs.getBoolean("traffic_blocked", true);
+//        boolean udp = prefs.getBoolean("proto_udp", true);
+//        boolean tcp = prefs.getBoolean("proto_tcp", true);
+//        boolean other = prefs.getBoolean("proto_other", true);
+//        boolean allowed = prefs.getBoolean("traffic_allowed", true);
+//        boolean blocked = prefs.getBoolean("traffic_blocked", true);
 
-        adapter = new AdapterLog(this, DatabaseHelper.getInstance(this).getLog(udp, tcp, other, allowed, blocked), resolve, organization);
-        adapter.setFilterQueryProvider(new FilterQueryProvider() {
-            public Cursor runQuery(CharSequence constraint) {
-                return DatabaseHelper.getInstance(ActivityLog.this).searchLog(constraint.toString());
-            }
-        });
-
-        lvLog.setAdapter(adapter);
+//        adapter = new AdapterLog(this, DatabaseHelper.getInstance(this).getLog(udp, tcp, other, allowed, blocked), resolve, organization);
+//        adapter.setFilterQueryProvider(new FilterQueryProvider() {
+//            public Cursor runQuery(CharSequence constraint) {
+//                return DatabaseHelper.getInstance(ActivityLog.this).searchLog(constraint.toString());
+//            }
+//        });
+//
+//        lvLog.setAdapter(adapter);
 
         try {
             vpn4 = InetAddress.getByName(prefs.getString("vpn4", "10.1.10.1"));
@@ -148,7 +148,7 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
             Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
         }
 
-        lvLog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*lvLog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PackageManager pm = getPackageManager();
@@ -282,11 +282,11 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
                 popup.show();
             }
         });
-
+*/
         live = true;
     }
 
-    @Override
+    /*@Override
     protected void onResume() {
         super.onResume();
         if (live) {
@@ -300,12 +300,12 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
         super.onPause();
         if (live)
             DatabaseHelper.getInstance(this).removeLogChangedListener(listener);
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
         running = false;
-        adapter = null;
+        //adapter = null;
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
     }
@@ -332,8 +332,8 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.logging, menu);
+        //MenuInflater inflater = getMenuInflater();
+        //inflater.inflate(R.menu.logging, menu);
 
         //menuSearch = menu.findItem(R.id.menu_search);
         //SearchView searchView = (SearchView) menuSearch.getActionView();
@@ -386,18 +386,18 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
 
         boolean export = (getPackageManager().resolveActivity(getIntentPCAPDocument(), 0) != null);
 
-        menu.findItem(R.id.menu_protocol_udp).setChecked(prefs.getBoolean("proto_udp", true));
-        menu.findItem(R.id.menu_protocol_tcp).setChecked(prefs.getBoolean("proto_tcp", true));
-        menu.findItem(R.id.menu_protocol_other).setChecked(prefs.getBoolean("proto_other", true));
-        menu.findItem(R.id.menu_traffic_allowed).setEnabled(prefs.getBoolean("filter", false));
-        menu.findItem(R.id.menu_traffic_allowed).setChecked(prefs.getBoolean("traffic_allowed", true));
-        menu.findItem(R.id.menu_traffic_blocked).setChecked(prefs.getBoolean("traffic_blocked", true));
+//        menu.findItem(R.id.menu_protocol_udp).setChecked(prefs.getBoolean("proto_udp", true));
+//        menu.findItem(R.id.menu_protocol_tcp).setChecked(prefs.getBoolean("proto_tcp", true));
+//        menu.findItem(R.id.menu_protocol_other).setChecked(prefs.getBoolean("proto_other", true));
+//        menu.findItem(R.id.menu_traffic_allowed).setEnabled(prefs.getBoolean("filter", false));
+//        menu.findItem(R.id.menu_traffic_allowed).setChecked(prefs.getBoolean("traffic_allowed", true));
+//        menu.findItem(R.id.menu_traffic_blocked).setChecked(prefs.getBoolean("traffic_blocked", true));
 
-        menu.findItem(R.id.menu_refresh).setEnabled(!menu.findItem(R.id.menu_log_live).isChecked());
-        menu.findItem(R.id.menu_log_resolve).setChecked(prefs.getBoolean("resolve", false));
-        menu.findItem(R.id.menu_log_organization).setChecked(prefs.getBoolean("organization", false));
-        menu.findItem(R.id.menu_pcap_enabled).setChecked(prefs.getBoolean("pcap", false));
-        menu.findItem(R.id.menu_pcap_export).setEnabled(pcap_file.exists() && export);
+//        menu.findItem(R.id.menu_refresh).setEnabled(!menu.findItem(R.id.menu_log_live).isChecked());
+//        menu.findItem(R.id.menu_log_resolve).setChecked(prefs.getBoolean("resolve", false));
+//        menu.findItem(R.id.menu_log_organization).setChecked(prefs.getBoolean("organization", false));
+//        menu.findItem(R.id.menu_pcap_enabled).setChecked(prefs.getBoolean("pcap", false));
+//        menu.findItem(R.id.menu_pcap_export).setEnabled(pcap_file.exists() && export);
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -413,7 +413,7 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
 
-            case R.id.menu_protocol_udp:
+            /*case R.id.menu_protocol_udp:
                 item.setChecked(!item.isChecked());
                 prefs.edit().putBoolean("proto_udp", item.isChecked()).apply();
                 updateAdapter();
@@ -441,36 +441,37 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
                 item.setChecked(!item.isChecked());
                 prefs.edit().putBoolean("traffic_blocked", item.isChecked()).apply();
                 updateAdapter();
-                return true;
+                return true;*/
 
-            case R.id.menu_log_live:
-                item.setChecked(!item.isChecked());
-                live = item.isChecked();
-                if (live) {
-                    DatabaseHelper.getInstance(this).addLogChangedListener(listener);
-                    updateAdapter();
-                } else
-                    DatabaseHelper.getInstance(this).removeLogChangedListener(listener);
-                return true;
+//            case R.id.menu_log_live:
+//                item.setChecked(!item.isChecked());
+//                live = item.isChecked();
+//                if (live) {
+//                    DatabaseHelper.getInstance(this).addLogChangedListener(listener);
+//                    updateAdapter();
+//                } else
+//                    DatabaseHelper.getInstance(this).removeLogChangedListener(listener);
+//                return true;
+//
+//            case R.id.menu_refresh:
+//                updateAdapter();
+//                return true;
+//
+//            case R.id.menu_log_resolve:
+//                item.setChecked(!item.isChecked());
+//                prefs.edit().putBoolean("resolve", item.isChecked()).apply();
+//                adapter.setResolve(item.isChecked());
+//                adapter.notifyDataSetChanged();
+//                return true;
+//
+//            case R.id.menu_log_organization:
+//                item.setChecked(!item.isChecked());
+//                prefs.edit().putBoolean("organization", item.isChecked()).apply();
+//                adapter.setOrganization(item.isChecked());
+//                adapter.notifyDataSetChanged();
+//                return true;
 
-            case R.id.menu_refresh:
-                updateAdapter();
-                return true;
-
-            case R.id.menu_log_resolve:
-                item.setChecked(!item.isChecked());
-                prefs.edit().putBoolean("resolve", item.isChecked()).apply();
-                adapter.setResolve(item.isChecked());
-                adapter.notifyDataSetChanged();
-                return true;
-
-            case R.id.menu_log_organization:
-                item.setChecked(!item.isChecked());
-                prefs.edit().putBoolean("organization", item.isChecked()).apply();
-                adapter.setOrganization(item.isChecked());
-                adapter.notifyDataSetChanged();
-                return true;
-
+            // TODO: Need to be ported to an external library
             case R.id.menu_pcap_enabled:
                 item.setChecked(!item.isChecked());
                 prefs.edit().putBoolean("pcap", item.isChecked()).apply();
@@ -500,25 +501,26 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
 
                     @Override
                     protected void onPostExecute(Object result) {
-                        if (running)
-                            updateAdapter();
+                        if (running){
+                            //updateAdapter();
+                        }
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 return true;
 
-            case R.id.menu_log_support:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://github.com/M66B/NetGuard/blob/master/FAQ.md#user-content-faq27"));
-                if (getPackageManager().resolveActivity(intent, 0) != null)
-                    startActivity(intent);
-                return true;
+//            case R.id.menu_log_support:
+//                Intent intent = new Intent(Intent.ACTION_VIEW);
+//                intent.setData(Uri.parse("https://github.com/M66B/NetGuard/blob/master/FAQ.md#user-content-faq27"));
+//                if (getPackageManager().resolveActivity(intent, 0) != null)
+//                    startActivity(intent);
+//                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void updateAdapter() {
+    /*private void updateAdapter() {
         if (adapter != null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             boolean udp = prefs.getBoolean("proto_udp", true);
@@ -527,12 +529,12 @@ public class ActivityLog extends AppCompatActivity implements SharedPreferences.
             boolean allowed = prefs.getBoolean("traffic_allowed", true);
             boolean blocked = prefs.getBoolean("traffic_blocked", true);
             adapter.changeCursor(DatabaseHelper.getInstance(this).getLog(udp, tcp, other, allowed, blocked));
-            /*if (menuSearch != null && menuSearch.isActionViewExpanded()) {
+            *//*if (menuSearch != null && menuSearch.isActionViewExpanded()) {
                 SearchView searchView = (SearchView) menuSearch.getActionView();
                 adapter.getFilter().filter(searchView.getQuery().toString());
-            }*/
+            }*//*
         }
-    }
+    }*/
 
     private Intent getIntentPCAPDocument() {
         Intent intent;

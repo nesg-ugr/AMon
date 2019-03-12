@@ -142,6 +142,9 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
         // Enable filtering
         prefs.edit().putBoolean("filter",true).apply();
         prefs.edit().putBoolean("log_app",true).apply();
+        // Enable usage tracking
+        prefs.edit().putBoolean("track_usage",true).apply();
+
 
         if (!getIntent().hasExtra(EXTRA_APPROVE)) {
             if (enabled)

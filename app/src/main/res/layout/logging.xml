@@ -9,7 +9,7 @@
     android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
-    <TextView
+    <!--<TextView
         android:id="@+id/tvDisabled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,5 +34,5 @@
         android:layout_height="0dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true" />-->
 </RelativeLayout>
