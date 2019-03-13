@@ -108,6 +108,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -217,6 +218,9 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     private native void jni_done(long context);
 
     public static void setPcap(boolean enabled, Context context) {
+        setPcap(enabled,null,context);
+    }
+    public static void setPcap(boolean enabled, File pcap, Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         int record_size = 64;
@@ -239,7 +243,8 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
             Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
         }
 
-        File pcap = (enabled ? new File(context.getDir("data", MODE_PRIVATE), "netguard.pcap") : null);
+
+        pcap = (enabled && pcap==null ? new File(context.getDir("data", MODE_PRIVATE), "netguard.pcap") : null);
         jni_pcap(pcap == null ? null : pcap.getAbsolutePath(), record_size, file_size);
     }
 
@@ -2310,7 +2315,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         // Native init
         jni_context = jni_init(Build.VERSION.SDK_INT);
         boolean pcap = prefs.getBoolean("pcap", false);
-        setPcap(pcap, this);
+        setPcap(pcap, null, this);
 
         prefs.registerOnSharedPreferenceChangeListener(this);
 
