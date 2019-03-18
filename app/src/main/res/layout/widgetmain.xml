@@ -9,5 +9,5 @@
         android:id="@+id/ivEnabled"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@android:drawable/ic_menu_help" />
+        android:contentDescription="TODO" android:src="@android:drawable/ic_menu_help" />
 </LinearLayout>

@@ -63,7 +63,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -128,31 +130,22 @@ public class ActivityMain extends AppCompatActivity {
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // TODO: export all the needed options to method that refresh accordingly ServiceSinkhole.
         // Disable traffic lockdown
-        prefs.edit().putBoolean("lockdown",false).apply();
-        //prefs.edit().putBoolean("lockdown_wifi",false).apply();
-        //prefs.edit().putBoolean("lockdown_other",false).apply();
+        lockNetwork(false);
         // Enable filtering
-        prefs.edit().putBoolean("log",true).apply();
-        prefs.edit().putBoolean("filter",true).apply();
-        prefs.edit().putBoolean("log_app",true).apply();
+        logging(true);
         // Enable usage tracking
-        prefs.edit().putBoolean("track_usage",true).apply();
+        trackUsage(true);
         // Enable all packets filtering
-        prefs.edit().putBoolean("proto_udp",true).apply();
-        prefs.edit().putBoolean("proto_tcp",true).apply();
-        prefs.edit().putBoolean("proto_other",true).apply();
-        prefs.edit().putBoolean("traffic_allowed",true).apply();
-        prefs.edit().putBoolean("traffic_blocked",true).apply();
-
-
+        packetLogging(true,true,true,true,true);
 
         boolean enabled = prefs.getBoolean("enabled", false);
         boolean initialized = prefs.getBoolean("initialized", false);
 
         // Upgrade - Modify some prefs, could be extracted.
         ReceiverAutostart.upgrade(initialized, this);
+        //prefs.edit().putBoolean("lockdown_wifi",false).apply();
+        //prefs.edit().putBoolean("lockdown_other",false).apply();
 
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);
@@ -172,141 +165,8 @@ public class ActivityMain extends AppCompatActivity {
                 ServiceSinkhole.stop("UI", this, false);
         }
 
-        // Action bar
-        /*final View actionView = getLayoutInflater().inflate(R.layout.actionmain, null, false);
-        ivIcon = actionView.findViewById(R.id.ivIcon);
-        ivQueue = actionView.findViewById(R.id.ivQueue);
-        swEnabled = actionView.findViewById(R.id.swEnabled);
-        ivMetered = actionView.findViewById(R.id.ivMetered);
-*/
-        // Title
-        //getSupportActionBar().setTitle(null);
-
-        // Netguard is busy
-        /*ivQueue.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                int location[] = new int[2];
-                actionView.getLocationOnScreen(location);
-                Toast toast = Toast.makeText(ActivityMain.this, R.string.msg_queue, Toast.LENGTH_LONG);
-                toast.setGravity(
-                        Gravity.TOP | Gravity.LEFT,
-                        location[0] + ivQueue.getLeft(),
-                        Math.round(location[1] + ivQueue.getBottom() - toast.getView().getPaddingTop()));
-                toast.show();
-                return true;
-            }
-        });*/
-
-        // On/off switch
-        /*swEnabled.setChecked(enabled);
-        swEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i(TAG, "Switch=" + isChecked);
-                prefs.edit().putBoolean("enabled", isChecked).apply();
-
-                if (isChecked) {
-
-                    String alwaysOn = Settings.Secure.getString(getContentResolver(), "always_on_vpn_app");
-                    Log.i(TAG, "Always-on=" + alwaysOn);
-                    if (!TextUtils.isEmpty(alwaysOn))
-                        if (getPackageName().equals(alwaysOn)) {
-                            if (prefs.getBoolean("filter", false)) {
-                                int lockdown = Settings.Secure.getInt(getContentResolver(), "always_on_vpn_lockdown", 0);
-                                Log.i(TAG, "Lockdown=" + lockdown);
-                                if (lockdown != 0) {
-                                    swEnabled.setChecked(false);
-                                    Toast.makeText(ActivityMain.this, R.string.msg_always_on_lockdown, Toast.LENGTH_LONG).show();
-                                    return;
-                                }
-                            }
-                        } else {
-                            swEnabled.setChecked(false);
-                            Toast.makeText(ActivityMain.this, R.string.msg_always_on, Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                    String dns_mode = Settings.Global.getString(getContentResolver(), "private_dns_mode");
-                    Log.i(TAG, "Private DNS mode=" + dns_mode);
-                    if (dns_mode == null)
-                        dns_mode = "off";
-                    if (!"off".equals(dns_mode)) {
-                        swEnabled.setChecked(false);
-                        Toast.makeText(ActivityMain.this, R.string.msg_private_dns, Toast.LENGTH_LONG).show();
-                        return;
-                    }
-
-                    try {
-                        final Intent prepare = VpnService.prepare(ActivityMain.this);
-                        if (prepare == null) {
-                            Log.i(TAG, "Prepare done");
-                            onActivityResult(REQUEST_VPN, RESULT_OK, null);
-                        } else {
-                            // Show dialog
-                            LayoutInflater inflater = LayoutInflater.from(ActivityMain.this);
-                            View view = inflater.inflate(R.layout.vpn, null, false);
-                            dialogVpn = new AlertDialog.Builder(ActivityMain.this)
-                                    .setView(view)
-                                    .setCancelable(false)
-                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            if (running) {
-                                                Log.i(TAG, "Start intent=" + prepare);
-                                                try {
-                                                    // com.android.vpndialogs.ConfirmDialog required
-                                                    startActivityForResult(prepare, REQUEST_VPN);
-                                                } catch (Throwable ex) {
-                                                    Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-                                                    onActivityResult(REQUEST_VPN, RESULT_CANCELED, null);
-                                                    prefs.edit().putBoolean("enabled", false).apply();
-                                                }
-                                            }
-                                        }
-                                    })
-                                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                        @Override
-                                        public void onDismiss(DialogInterface dialogInterface) {
-                                            dialogVpn = null;
-                                        }
-                                    })
-                                    .create();
-                            dialogVpn.show();
-                        }
-                    } catch (Throwable ex) {
-                        // Prepare failed
-                        Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-                        prefs.edit().putBoolean("enabled", false).apply();
-                    }
-
-                } else
-                    ServiceSinkhole.stop("switch off", ActivityMain.this, false);
-            }
-        });*/
         if (enabled)
             checkDoze();
-
-        // Network is metered
-        /*ivMetered.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                int location[] = new int[2];
-                actionView.getLocationOnScreen(location);
-                Toast toast = Toast.makeText(ActivityMain.this, R.string.msg_metered, Toast.LENGTH_LONG);
-                toast.setGravity(
-                        Gravity.TOP | Gravity.LEFT,
-                        location[0] + ivMetered.getLeft(),
-                        Math.round(location[1] + ivMetered.getBottom() - toast.getView().getPaddingTop()));
-                toast.show();
-                return true;
-            }
-        });*/
-
-        /*getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(actionView);
-*/
-        // Listen for preference changes
-        //prefs.registerOnSharedPreferenceChangeListener(this);
 
         // Listen for rule set changes
         IntentFilter ifr = new IntentFilter(ACTION_RULES_CHANGED);
@@ -496,56 +356,6 @@ public class ActivityMain extends AppCompatActivity {
                 ServiceSinkhole.reload("permission granted", this, false);
     }
 
-    /*@Override
-    public void onSharedPreferenceChanged(SharedPreferences prefs, String name) {
-        Log.i(TAG, "Preference " + name + "=" + prefs.getAll().get(name));
-        if ("enabled".equals(name)) {
-            // Get enabled
-            boolean enabled = prefs.getBoolean(name, false);
-
-            // Display disabled warning
-            //TextView tvDisabled = findViewById(R.id.tvDisabled);
-            //tvDisabled.setVisibility(enabled ? View.GONE : View.VISIBLE);
-
-            // Check switch state
-            SwitchCompat swEnabled = getSupportActionBar().getCustomView().findViewById(R.id.swEnabled);
-            if (swEnabled.isChecked() != enabled)
-                swEnabled.setChecked(enabled);
-
-        } else if ("whitelist_wifi".equals(name) ||
-                "screen_on".equals(name) ||
-                "screen_wifi".equals(name) ||
-                "whitelist_other".equals(name) ||
-                "screen_other".equals(name) ||
-                "whitelist_roaming".equals(name) ||
-                "show_user".equals(name) ||
-                "show_system".equals(name) ||
-                "show_nointernet".equals(name) ||
-                "show_disabled".equals(name) ||
-                "sort".equals(name) ||
-                "imported".equals(name)) {
-            //updateApplicationList(null);
-
-            //final LinearLayout llWhitelist = findViewById(R.id.llWhitelist);
-//            boolean screen_on = prefs.getBoolean("screen_on", true);
-//            boolean whitelist_wifi = prefs.getBoolean("whitelist_wifi", false);
-//            boolean whitelist_other = prefs.getBoolean("whitelist_other", false);
-//            boolean hintWhitelist = prefs.getBoolean("hint_whitelist", true);
-            //llWhitelist.setVisibility(!(whitelist_wifi || whitelist_other) && screen_on && hintWhitelist ? View.VISIBLE : View.GONE);
-
-        } else if ("manage_system".equals(name)) {
-            invalidateOptionsMenu();
-            //updateApplicationList(null);
-
-//            LinearLayout llSystem = findViewById(R.id.llSystem);
-//            boolean system = prefs.getBoolean("manage_system", false);
-//            boolean hint = prefs.getBoolean("hint_system", true);
-//            llSystem.setVisibility(!system && hint ? View.VISIBLE : View.GONE);
-
-        } else if ("theme".equals(name) || "dark_theme".equals(name))
-            recreate();
-    }*/
-
     private BroadcastReceiver onRulesChanged = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -559,9 +369,6 @@ public class ActivityMain extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "Received " + intent);
             Util.logExtras(intent);
-            int size = intent.getIntExtra(EXTRA_SIZE, -1);
-//            ivIcon.setVisibility(size == 0 ? View.VISIBLE : View.GONE);
-//            ivQueue.setVisibility(size == 0 ? View.GONE : View.VISIBLE);
         }
     };
 
@@ -573,132 +380,12 @@ public class ActivityMain extends AppCompatActivity {
         }
     };
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (Build.VERSION.SDK_INT < MIN_SDK)
-            return false;
-
-        PackageManager pm = getPackageManager();
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-
-        // Search
-        *//*menuSearch = menu.findItem(R.id.menu_search);
-        menuSearch.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                if (getIntent().hasExtra(EXTRA_SEARCH) && !getIntent().getBooleanExtra(EXTRA_RELATED, false))
-                    finish();
-                return true;
-            }
-        });*//*
-
-        *//*final SearchView searchView = (SearchView) menuSearch.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                if (adapter != null)
-                    adapter.getFilter().filter(query);
-                searchView.clearFocus();
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (adapter != null)
-                    adapter.getFilter().filter(newText);
-                return true;
-            }
-        });
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                Intent intent = getIntent();
-                intent.removeExtra(EXTRA_SEARCH);
-
-                if (adapter != null)
-                    adapter.getFilter().filter(null);
-                return true;
-            }
-        });
-        String search = getIntent().getStringExtra(EXTRA_SEARCH);
-        if (search != null) {
-            menuSearch.expandActionView();
-            searchView.setQuery(search, true);
-        }*//*
-
-        return true;
-    }
-*/
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "Menu=" + item.getTitle());
-
-        // Handle item selection
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        switch (item.getItemId()) {
-            *//*case R.id.menu_app_user:
-                item.setChecked(!item.isChecked());
-                prefs.edit().putBoolean("show_user", item.isChecked()).apply();
-                return true;
-
-            case R.id.menu_app_system:
-                item.setChecked(!item.isChecked());
-                prefs.edit().putBoolean("show_system", item.isChecked()).apply();
-                return true;
-
-            case R.id.menu_app_nointernet:
-                item.setChecked(!item.isChecked());
-                prefs.edit().putBoolean("show_nointernet", item.isChecked()).apply();
-                return true;
-
-            case R.id.menu_app_disabled:
-                item.setChecked(!item.isChecked());
-                prefs.edit().putBoolean("show_disabled", item.isChecked()).apply();
-                return true;*//*
-
-            *//*case R.id.menu_sort_name:
-                item.setChecked(true);
-                prefs.edit().putString("sort", "name").apply();
-                return true;
-
-            case R.id.menu_sort_uid:
-                item.setChecked(true);
-                prefs.edit().putString("sort", "uid").apply();
-                return true;*//*
-
-//            case R.id.menu_lockdown:
-//                menu_lockdown(item);
-//                return true;
-
-            case R.id.menu_log:
-                if (Util.canFilter(this))
-                    startActivity(new Intent(this, ActivityLog.class));
-                else
-                    Toast.makeText(this, R.string.msg_unavailable, Toast.LENGTH_SHORT).show();
-                return true;
-
-//            case R.id.menu_settings:
-//                startActivity(new Intent(this, ActivitySettings.class));
-//                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }*/
-
-
     private void checkExtras(Intent intent) {
         // Approve request
         if (intent.hasExtra(EXTRA_APPROVE)) {
             Log.i(TAG, "Requesting VPN approval");
             //swEnabled.toggle();
+            activateVpn(!isVpnActivated());
         }
 
         if (intent.hasExtra(EXTRA_LOGCAT)) {
@@ -790,36 +477,19 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private void menu_lockdown(MenuItem item) {
-        item.setChecked(!item.isChecked());
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putBoolean("lockdown", item.isChecked()).apply();
-        ServiceSinkhole.reload("lockdown", this, false);
-        WidgetLockdown.updateWidgets(this);
-    }
-
     private Intent getIntentLogcat() {
         Intent intent;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            if (Util.isPackageInstalled("org.openintents.filemanager", this)) {
-                intent = new Intent("org.openintents.action.PICK_DIRECTORY");
-            } else {
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=org.openintents.filemanager"));
-            }
-        } else {
-            intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TITLE, "logcat.txt");
-        }
+        intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TITLE, "logcat.txt");
         return intent;
     }
 
     public void enablePcap(File file){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        prefs.edit().putBoolean("pcap", true);
+        prefs.edit().putBoolean("pcap", true).apply();
         ServiceSinkhole.setPcap(true, file, this);
     }
 
@@ -859,19 +529,10 @@ public class ActivityMain extends AppCompatActivity {
 
     private Intent getIntentPCAPDocument() {
         Intent intent;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            if (Util.isPackageInstalled("org.openintents.filemanager", this)) {
-                intent = new Intent("org.openintents.action.PICK_DIRECTORY");
-            } else {
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=org.openintents.filemanager"));
-            }
-        } else {
-            intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("application/octet-stream");
-            intent.putExtra(Intent.EXTRA_TITLE, "netguard_" + new SimpleDateFormat("yyyyMMdd").format(new Date().getTime()) + ".pcap");
-        }
+        intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/octet-stream");
+        intent.putExtra(Intent.EXTRA_TITLE, "netguard_" + new SimpleDateFormat("yyyyMMdd").format(new Date().getTime()) + ".pcap");
         return intent;
     }
 
@@ -936,6 +597,11 @@ public class ActivityMain extends AppCompatActivity {
                     Toast.makeText(ActivityMain.this, ex.toString(), Toast.LENGTH_LONG).show();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public boolean isVpnActivated(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("enabled",false);
     }
 
     // Exported functionality from the previous switch.
@@ -1014,5 +680,68 @@ public class ActivityMain extends AppCompatActivity {
         } else{
             ServiceSinkhole.stop("switch off", ActivityMain.this, false);
         }
+    }
+
+    public boolean isNetworkLocked(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("lockdown",false);
+    }
+
+    public void lockNetwork(boolean locked){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("lockdown",locked).apply();
+        ServiceSinkhole.reload("changed lockdown", this, false);
+        WidgetLockdown.updateWidgets(this);
+    }
+
+    public boolean isLogging(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("log",false) &&
+                prefs.getBoolean("filter",false) &&
+                prefs.getBoolean("log_app",false);
+    }
+
+    private void logging(boolean enabled) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        // Could be factorized
+        prefs.edit().putBoolean("log",enabled).apply();
+        prefs.edit().putBoolean("filter",enabled).apply();
+        prefs.edit().putBoolean("log_app",enabled).apply();
+        ServiceSinkhole.reload("changed logging", this, false);
+
+    }
+
+    public boolean isUsageTracked(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("track_usage",false);
+    }
+
+    public void trackUsage(boolean enabled){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("track_usage", enabled).apply();
+        ServiceSinkhole.reload("changed tracking", this, false);
+    }
+
+    public Map<String, Boolean> loggedPackets(){
+        Map<String, Boolean> booleanMap = new HashMap<>();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        booleanMap.put("proto_udp",prefs.getBoolean("proto_udp",false));
+        booleanMap.put("proto_tcp",prefs.getBoolean("proto_tcp",false));
+        booleanMap.put("proto_other",prefs.getBoolean("proto_other",false));
+        booleanMap.put("traffic_allowed",prefs.getBoolean("traffic_allowed",false));
+        booleanMap.put("traffic_blocked",prefs.getBoolean("traffic_blocked",false));
+
+        return booleanMap;
+    }
+
+    public void packetLogging(boolean udp, boolean tcp, boolean other,
+                              boolean traffic_allowed, boolean traffic_blocked){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("proto_udp",udp).apply();
+        prefs.edit().putBoolean("proto_tcp",tcp).apply();
+        prefs.edit().putBoolean("proto_other",other).apply();
+        prefs.edit().putBoolean("traffic_allowed",traffic_allowed).apply();
+        prefs.edit().putBoolean("traffic_blocked",traffic_blocked).apply();
+        ServiceSinkhole.reload("changed packet logging", this, false);
     }
 }

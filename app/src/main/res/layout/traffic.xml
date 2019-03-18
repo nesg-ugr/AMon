@@ -89,7 +89,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:scaleType="fitXY" />
+        android:contentDescription="TODO" android:scaleType="fitXY" />
 
     <TextView
         android:id="@+id/tvMax"

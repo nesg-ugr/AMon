@@ -27,11 +27,11 @@
                 android:layout_height="32dp"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:alpha="0.5"
-                android:src="?attr/expander" />
+                android:contentDescription="TODO" android:src="?attr/expander" />
 
             <ImageView
                 android:id="@+id/ivIcon"
-                android:layout_width="?android:attr/listPreferredItemHeightSmall"
+                android:layout_width="?android:attr/listPreferredItemHeightSmall" android:contentDescription="TODO" 
                 android:layout_height="?android:attr/listPreferredItemHeightSmall"
                 android:layout_gravity="center_vertical" />
 
@@ -69,7 +69,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/lockdown" />
+                android:contentDescription="TODO" android:src="@drawable/lockdown" />
         </RelativeLayout>
 
         <LinearLayout
@@ -102,7 +102,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/screen" />
+                    android:contentDescription="TODO" android:src="@drawable/screen" />
 
                 <View
                     android:layout_width="16dp"
@@ -142,7 +142,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/screen" />
+                    android:contentDescription="TODO" android:src="@drawable/screen" />
 
                 <TextView
                     android:id="@+id/tvRoaming"
@@ -240,7 +240,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:src="?attr/iconDatasaver"
+                android:contentDescription="TODO" android:src="?attr/iconDatasaver"
                 android:visibility="gone" />
 
             <ImageButton
@@ -250,14 +250,14 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:src="?attr/iconSettings" />
+                android:contentDescription="TODO" android:src="?attr/iconSettings" />
 
             <ImageButton
                 android:id="@+id/ibLaunch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:src="?attr/iconLaunch" />
+                android:contentDescription="TODO" android:src="?attr/iconLaunch" />
         </LinearLayout>
 
         <CheckBox
@@ -286,7 +286,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/screen_on" />
+                android:contentDescription="TODO" android:src="@drawable/screen_on" />
 
             <CheckBox
                 android:id="@+id/cbScreenWifi"
@@ -308,7 +308,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/screen_on" />
+                android:contentDescription="TODO" android:src="@drawable/screen_on" />
 
             <CheckBox
                 android:id="@+id/cbScreenOther"
@@ -353,7 +353,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/lockdown_off" />
+                android:contentDescription="TODO" android:src="@drawable/lockdown_off" />
 
             <CheckBox
                 android:id="@+id/cbLockdown"
@@ -368,7 +368,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:src="?attr/iconDelete" />
+            android:contentDescription="TODO" android:src="?attr/iconDelete" />
 
         <LinearLayout
             android:id="@+id/llFilter"
@@ -397,7 +397,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
-                    android:src="?attr/iconPause" />
+                    android:contentDescription="TODO" android:src="?attr/iconPause" />
             </LinearLayout>
 
             <LinearLayout
@@ -447,7 +447,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop="4dp"
-                android:src="?attr/iconDelete" />
+                android:contentDescription="TODO" android:src="?attr/iconDelete" />
 
             <TextView
                 android:layout_width="wrap_content"

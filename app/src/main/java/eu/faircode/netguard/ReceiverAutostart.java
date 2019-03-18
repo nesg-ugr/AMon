@@ -96,12 +96,7 @@ public class ReceiverAutostart extends BroadcastReceiver {
                 Log.i(TAG, "Initializing sdk=" + Build.VERSION.SDK_INT);
                 editor.putBoolean("whitelist_wifi", false);
                 editor.putBoolean("whitelist_other", false);
-                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP)
-                    editor.putBoolean("filter", true); // Optional
             }
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-                editor.putBoolean("filter", true); // Mandatory
 
             if (!Util.canFilter(context)) {
                 editor.putBoolean("log_app", false);
