@@ -453,7 +453,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                     LocalBroadcastManager.getInstance(ServiceSinkhole.this).sendBroadcast(ruleset);
 
                     // Update widgets
-                    WidgetMain.updateWidgets(ServiceSinkhole.this);
+                    //WidgetMain.updateWidgets(ServiceSinkhole.this);
                 }
 
                 // Stop service if needed
@@ -481,7 +481,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         // Disable firewall
                         if (!(ex instanceof StartFailedException)) {
                             prefs.edit().putBoolean("enabled", false).apply();
-                            WidgetMain.updateWidgets(ServiceSinkhole.this);
+                            //WidgetMain.updateWidgets(ServiceSinkhole.this);
                         }
                     }
                 } else
@@ -1770,7 +1770,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             prefs.edit().putBoolean("enabled", false).apply();
-            WidgetMain.updateWidgets(this);
+            //WidgetMain.updateWidgets(this);
         }
     }
 
@@ -2544,7 +2544,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
 
         // Feedback
         showDisabledNotification();
-        WidgetMain.updateWidgets(this);
+        //WidgetMain.updateWidgets(this);
 
         super.onRevoke();
     }

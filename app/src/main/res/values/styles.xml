@@ -11,11 +11,6 @@
     <attr name="iconPlay" format="reference" />
     <attr name="iconPause" format="reference" />
 
-    <style name="AppDialog" parent="Theme.AppCompat.Dialog">
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
     <style name="BaseThemeDark" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="expander">@drawable/expander_black</item>
         <item name="iconQueue">@drawable/ic_hourglass_empty_black_24dp</item>

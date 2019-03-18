@@ -301,10 +301,7 @@ public class Util {
 
     public static boolean isInteractive(Context context) {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH)
-            return (pm != null && pm.isScreenOn());
-        else
-            return (pm != null && pm.isInteractive());
+        return (pm != null && pm.isInteractive());
     }
 
     public static boolean isPackageInstalled(String packageName, Context context) {
@@ -489,7 +486,7 @@ public class Util {
         else if (theme.equals("green"))
             context.setTheme(dark ? R.style.AppThemeGreenDark : R.style.AppThemeGreen);
 
-        if (context instanceof Activity && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        if (context instanceof Activity)
             setTaskColor(context);
     }
 
@@ -720,8 +717,7 @@ public class Util {
             sb.append(String.format("Network %s/%s/%s\r\n", tm.getNetworkCountryIso(), tm.getNetworkOperatorName(), tm.getNetworkOperator()));
 
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            sb.append(String.format("Power saving %B\r\n", pm.isPowerSaveMode()));
+        sb.append(String.format("Power saving %B\r\n", pm.isPowerSaveMode()));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             sb.append(String.format("Battery optimizing %B\r\n", batteryOptimizing(context)));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -740,14 +736,11 @@ public class Util {
         NetworkInfo ani = cm.getActiveNetworkInfo();
         List<NetworkInfo> listNI = new ArrayList<>();
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-            listNI.addAll(Arrays.asList(cm.getAllNetworkInfo()));
-        else
-            for (Network network : cm.getAllNetworks()) {
-                NetworkInfo ni = cm.getNetworkInfo(network);
-                if (ni != null)
-                    listNI.add(ni);
-            }
+        for (Network network : cm.getAllNetworks()) {
+            NetworkInfo ni = cm.getNetworkInfo(network);
+            if (ni != null)
+                listNI.add(ni);
+        }
 
         for (NetworkInfo ni : listNI) {
             sb.append(ni.getTypeName()).append('/').append(ni.getSubtypeName())
@@ -824,10 +817,7 @@ public class Util {
                 sb.append(String.format("Fingerprint: %B\r\n", hasValidFingerprint(context)));
 
                 String abi;
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-                    abi = Build.CPU_ABI;
-                else
-                    abi = (Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "?");
+                abi = (Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "?");
                 sb.append(String.format("ABI: %s\r\n", abi));
 
                 sb.append("\r\n");

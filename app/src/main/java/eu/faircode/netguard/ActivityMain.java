@@ -691,7 +691,7 @@ public class ActivityMain extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().putBoolean("lockdown",locked).apply();
         ServiceSinkhole.reload("changed lockdown", this, false);
-        WidgetLockdown.updateWidgets(this);
+        //WidgetLockdown.updateWidgets(this);
     }
 
     public boolean isLogging(){
