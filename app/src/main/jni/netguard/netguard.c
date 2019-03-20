@@ -42,6 +42,7 @@ jclass clsPacket;
 jclass clsAllowed;
 jclass clsRR;
 jclass clsUsage;
+jclass clsFlow;
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     log_android(ANDROID_LOG_INFO, "JNI load");
@@ -63,6 +64,9 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     const char *usage = "eu/faircode/netguard/Usage";
     clsUsage = jniGlobalRef(env, jniFindClass(env, usage));
+
+    const char *flow = "eu/faircode/netguard/Flow";
+    clsFlow = jniGlobalRef(env, jniFindClass(env, flow));
 
     // Raise file number limit to maximum
     struct rlimit rlim;
@@ -847,5 +851,85 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
                 (end.tv_usec - start.tv_usec) / 1000.0;
     if (mselapsed > PROFILE_JNI)
         log_android(ANDROID_LOG_WARN, "log_packet %f", mselapsed);
+#endif
+}
+
+jmethodID midCaptureFlow = NULL;
+jmethodID midInitFlow = NULL;
+jfieldID fidFlowTime = NULL;
+jfieldID fidFlowVersion = NULL;
+jfieldID fidFlowProtocol = NULL;
+jfieldID fidFlowSAddr = NULL;
+jfieldID fidFlowSPort = NULL;
+jfieldID fidFlowDAddr = NULL;
+jfieldID fidFlowDPort = NULL;
+jfieldID fidFlowUid = NULL;
+jfieldID fidFlowSent = NULL;
+jfieldID fidFlowReceived = NULL;
+
+void capture_flow(const struct arguments *args, jint version, jint protocol,
+                  const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
+                  jlong sent, jlong received) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
+    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
+
+    const char *signature = "(Leu/faircode/netguard/Flow;)V";
+    if (midCaptureFlow == NULL)
+        midCaptureFlow = jniGetMethodID(args->env, clsService, "captureFlow", signature);
+
+    const char *flow = "eu/faircode/netguard/Flow";
+    if (midInitFlow == NULL)
+        midInitFlow = jniGetMethodID(args->env, clsFlow, "<init>", "()V");
+
+    jobject jflow = jniNewObject(args->env, clsFlow, midInitFlow, flow);
+
+    if (fidFlowTime == NULL) {
+        const char *string = "Ljava/lang/String;";
+        fidFlowTime = jniGetFieldID(args->env, clsFlow, "Time", "J");
+        fidFlowVersion = jniGetFieldID(args->env, clsFlow, "Version", "I");
+        fidFlowProtocol = jniGetFieldID(args->env, clsFlow, "Protocol", "I");
+        fidFlowSAddr = jniGetFieldID(args->env, clsFlow, "SAddr", string);
+        fidFlowSPort = jniGetFieldID(args->env, clsFlow, "SPort", "I");
+        fidFlowDAddr = jniGetFieldID(args->env, clsFlow, "DAddr", string);
+        fidFlowDPort = jniGetFieldID(args->env, clsFlow, "DPort", "I");
+        fidFlowUid = jniGetFieldID(args->env, clsFlow, "Uid", "I");
+        fidFlowSent = jniGetFieldID(args->env, clsFlow, "Sent", "J");
+        fidFlowReceived = jniGetFieldID(args->env, clsFlow, "Received", "J");
+    }
+
+    jlong jtime = time(NULL) * 1000LL;
+    jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
+    jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
+
+    (*args->env)->SetLongField(args->env, jflow, fidFlowTime, jtime);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowVersion, version);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowProtocol, protocol);
+    (*args->env)->SetObjectField(args->env, jflow, fidFlowSAddr, jsaddr);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowSPort, sport);
+    (*args->env)->SetObjectField(args->env, jflow, fidFlowDAddr, jdaddr);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowDPort, dport);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowUid, uid);
+    (*args->env)->SetLongField(args->env, jflow, fidFlowSent, sent);
+    (*args->env)->SetLongField(args->env, jflow, fidFlowReceived, received);
+
+    (*args->env)->CallVoidMethod(args->env, args->instance, midCaptureFlow, jflow);
+    jniCheckException(args->env);
+
+    (*args->env)->DeleteLocalRef(args->env, jsaddr);
+    (*args->env)->DeleteLocalRef(args->env, jdaddr);
+    (*args->env)->DeleteLocalRef(args->env, jflow);
+    (*args->env)->DeleteLocalRef(args->env, clsService);
+
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "capture_flow %f", mselapsed);
 #endif
 }

@@ -108,7 +108,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -184,6 +183,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     private static final int MSG_STATS_UPDATE = 3;
     private static final int MSG_PACKET = 4;
     private static final int MSG_USAGE = 5;
+    private static final int MSG_FLOW = 6;
 
     private enum State {none, waiting, enforcing, stats}
 
@@ -711,6 +711,10 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         usage((Usage) msg.obj);
                         break;
 
+                    case MSG_FLOW:
+                        flow((Flow) msg.obj);
+                        break;
+
                     default:
                         Log.e(TAG, "Unknown log message=" + msg.what);
                 }
@@ -758,6 +762,29 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                     String dname = dh.getQName(usage.Uid, usage.DAddr);
                     Log.i(TAG, "Usage account " + usage + " dname=" + dname);
                     dh.updateUsage(usage, dname);
+                }
+            }
+        }
+
+        private void flow(Flow flow){
+            // TODO
+            // Discard DNS traffic from system
+            if (flow.Uid >= 0 && !(flow.Uid == 0 && flow.Protocol == 17 && flow.DPort == 53)){
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ServiceSinkhole.this);
+                boolean collect_flow = prefs.getBoolean("collect_flow", false);
+                if(collect_flow){
+                    ApplicationInfo info = null;
+                    PackageManager pm = ServiceSinkhole.this.getPackageManager();
+                    String[] pkg = pm.getPackagesForUid(flow.Uid);
+                    if (pkg != null && pkg.length > 0){
+                        try {
+                            info = pm.getApplicationInfo(pkg[0], 0);
+                        } catch (PackageManager.NameNotFoundException ignored) {
+                        }
+                    }
+                    DatabaseHelper dh = DatabaseHelper.getInstance(ServiceSinkhole.this);
+                    Log.i(TAG, "Collected flow " + flow);
+                    dh.insertFlow(flow, info==null ? null : info.packageName);
                 }
             }
         }
@@ -1378,6 +1405,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         boolean log = prefs.getBoolean("log", false);
         boolean log_app = prefs.getBoolean("log_app", false);
         boolean filter = prefs.getBoolean("filter", false);
+        boolean collect_flow = prefs.getBoolean("collect_flow", false);
 
         Log.i(TAG, "Start native log=" + log + "/" + log_app + " filter=" + filter);
 
@@ -1405,7 +1433,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
             lock.writeLock().unlock();
         }
 
-        if (log || log_app || filter) {
+        if (log || log_app || filter || collect_flow) {
             int prio = Integer.parseInt(prefs.getString("loglevel", Integer.toString(Log.WARN)));
             final int rcode = Integer.parseInt(prefs.getString("rcode", "3"));
             if (prefs.getBoolean("socks5_enabled", false))
@@ -1896,6 +1924,15 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         Message msg = logHandler.obtainMessage();
         msg.obj = usage;
         msg.what = MSG_USAGE;
+        logHandler.sendMessage(msg);
+    }
+
+    // TODO
+    // Called from native code
+    private void captureFlow(Flow flow){
+        Message msg = logHandler.obtainMessage();
+        msg.obj = flow;
+        msg.what = MSG_FLOW;
         logHandler.sendMessage(msg);
     }
 

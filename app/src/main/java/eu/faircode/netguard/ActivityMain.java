@@ -132,12 +132,12 @@ public class ActivityMain extends AppCompatActivity {
 
         // Disable traffic lockdown
         lockNetwork(false);
-        // Enable filtering
-        logging(true);
-        // Enable usage tracking
-        trackUsage(true);
-        // Enable all packets filtering
-        packetLogging(true,true,true,true,true);
+        // Disable filtering
+        logging(false);
+        // Disable usage tracking
+        trackUsage(false);
+        // Enable flow collecting
+        collectFlow(true);
 
         boolean enabled = prefs.getBoolean("enabled", false);
         boolean initialized = prefs.getBoolean("initialized", false);
@@ -318,6 +318,7 @@ public class ActivityMain extends AppCompatActivity {
             // Handle VPN approval
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             prefs.edit().putBoolean("enabled", resultCode == RESULT_OK).apply();
+            prefs.edit().putBoolean("filter", true).apply();
             if (resultCode == RESULT_OK) {
                 ServiceSinkhole.start("prepared", this);
 
@@ -696,24 +697,30 @@ public class ActivityMain extends AppCompatActivity {
 
     public boolean isLogging(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        return prefs.getBoolean("log",false) &&
-                prefs.getBoolean("filter",false) &&
-                prefs.getBoolean("log_app",false);
+        return prefs.getBoolean("log",false);
+
     }
 
-    private void logging(boolean enabled) {
+    public void logging(boolean enabled) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        // Could be factorized
         prefs.edit().putBoolean("log",enabled).apply();
-        prefs.edit().putBoolean("filter",enabled).apply();
-        prefs.edit().putBoolean("log_app",enabled).apply();
         ServiceSinkhole.reload("changed logging", this, false);
 
     }
 
+    public boolean isLoggingApp(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("log_app",false);
+    }
+
+    public void appLogging(boolean enabled){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("log_app",enabled).apply();
+    }
+
     public boolean isUsageTracked(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        return prefs.getBoolean("track_usage",false);
+        return prefs.getBoolean("track_usage",false) && isLoggingApp();
     }
 
     public void trackUsage(boolean enabled){
@@ -722,6 +729,7 @@ public class ActivityMain extends AppCompatActivity {
         ServiceSinkhole.reload("changed tracking", this, false);
     }
 
+    // Unused
     public Map<String, Boolean> loggedPackets(){
         Map<String, Boolean> booleanMap = new HashMap<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -734,6 +742,7 @@ public class ActivityMain extends AppCompatActivity {
         return booleanMap;
     }
 
+    // Unused
     public void packetLogging(boolean udp, boolean tcp, boolean other,
                               boolean traffic_allowed, boolean traffic_blocked){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -743,5 +752,16 @@ public class ActivityMain extends AppCompatActivity {
         prefs.edit().putBoolean("traffic_allowed",traffic_allowed).apply();
         prefs.edit().putBoolean("traffic_blocked",traffic_blocked).apply();
         ServiceSinkhole.reload("changed packet logging", this, false);
+    }
+
+    public boolean isFlowCollected(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("collect_flow",false);
+    }
+
+    public void collectFlow(boolean enabled){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("collect_flow", enabled).apply();
+        ServiceSinkhole.reload("changed flow capturing", this, false);
     }
 }

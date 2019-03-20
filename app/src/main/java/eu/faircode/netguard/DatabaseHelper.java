@@ -51,6 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static List<LogChangedListener> logChangedListeners = new ArrayList<>();
     private static List<AccessChangedListener> accessChangedListeners = new ArrayList<>();
     private static List<ForwardChangedListener> forwardChangedListeners = new ArrayList<>();
+    private static List<FlowChangedListener> flowChangedListeners = new ArrayList<>();
 
     private static HandlerThread hthread = null;
     private static Handler handler = null;
@@ -76,13 +77,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private static DatabaseHelper dh = null;
+//    private static boolean enableTableLog = false;
+//    private static boolean enableTableAccess = false;
+//    private static boolean enableTableDns = false;
+//    private static boolean enableTableForward = false;
+//    private static boolean enableTableApp = false;
+//    private static boolean enableTableFlow = false;
 
-    public static DatabaseHelper getInstance(Context context) {
-        if (dh == null)
+/*
+    public static DatabaseHelper getInstance(Context context,
+                                             boolean enableTableLog, boolean enableTableAccess,
+                                             boolean enableTableDns, boolean enableTableForward,
+                                             boolean enableTableApp, boolean enableTableFlow){
+        if(dh==null){
             dh = new DatabaseHelper(context.getApplicationContext());
+            DatabaseHelper.enableTableLog = enableTableLog;
+            DatabaseHelper.enableTableAccess = enableTableAccess;
+            DatabaseHelper.enableTableDns = enableTableDns;
+            DatabaseHelper.enableTableForward = enableTableForward;
+            DatabaseHelper.enableTableApp = enableTableApp;
+            DatabaseHelper.enableTableFlow = enableTableFlow;
+        }
         return dh;
     }
 
+    public static DatabaseHelper getInstance(Context context) {
+
+        return getInstance(context,
+                true, true,
+                true, true,
+                true, true);
+    }*/
+
+    public static DatabaseHelper getInstance(Context context){
+        if(dh==null){
+            dh = new DatabaseHelper(context.getApplicationContext());
+        }
+        return dh;
+    }
     public static void clearCache() {
         synchronized (mapUidHosts) {
             mapUidHosts.clear();
@@ -122,7 +154,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createTableAccess(db);
         createTableDns(db);
         createTableForward(db);
-        createTableApp(db);
+        createTableApp(db);         // Populated en Rule.187
+        createTableFlow(db);
     }
 
     @Override
@@ -218,6 +251,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE UNIQUE INDEX idx_package ON app(package)");
     }
 
+    private void createTableFlow(SQLiteDatabase db){
+        Log.i(TAG, "Creating flow table");
+        db.execSQL("CREATE TABLE flow (" +
+                " ID INTEGER PRIMARY KEY AUTOINCREMENT" +
+                ", packageName TEXT" +
+                ", time INTEGER NOT NULL" +
+                ", version INTEGER" +
+                ", protocol INTEGER" +
+                ", saddr TEXT" +
+                ", sport INTEGER" +
+                ", daddr TEXT" +
+                ", dport INTEGER" +
+                ", sent INTEGER" +
+                ", received INTEGER" +
+                ");");
+    }
+
     private boolean columnExists(SQLiteDatabase db, String table, String column) {
         Cursor cursor = null;
         try {
@@ -238,6 +288,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.beginTransaction();
         try {
+            /*
             if (oldVersion < 2) {
                 if (!columnExists(db, "log", "version"))
                     db.execSQL("ALTER TABLE log ADD COLUMN version INTEGER");
@@ -352,7 +403,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Log.i(TAG, DB_NAME + " upgraded to " + DB_VERSION);
             } else
                 throw new IllegalArgumentException(DB_NAME + " upgraded to " + oldVersion + " but required " + DB_VERSION);
-
+            */
+            if (oldVersion != DB_VERSION) {
+                throw new IllegalArgumentException("Unimplemented upgrade");
+            }
         } catch (Throwable ex) {
             Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
         } finally {
@@ -363,6 +417,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Log
 
     public void insertLog(Packet packet, String dname, int connection, boolean interactive) {
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Log table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -423,6 +482,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void clearLog(int uid) {
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Log table is not created.");
+            return;
+        }*/
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -447,6 +510,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void cleanupLog(long time) {
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Log table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -468,6 +536,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getLog(boolean udp, boolean tcp, boolean other, boolean allowed, boolean blocked) {
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Log table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -496,6 +569,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor searchLog(String find) {
+       /* if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Log table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -513,6 +591,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Access
 
     public boolean updateAccess(Packet packet, String dname, int block) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return false;
+        }*/
+
         int rows;
 
         lock.writeLock().lock();
@@ -562,6 +645,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void updateUsage(Usage usage, String dname) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -612,6 +700,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void setAccess(long id, int block) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -636,6 +729,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void clearAccess() {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -655,6 +753,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void clearAccess(int uid, boolean keeprules) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -679,6 +782,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void resetUsage(int uid) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             // There is a segmented index on uid
@@ -705,6 +813,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAccess(int uid) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -723,6 +836,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAccess() {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -735,6 +853,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAccessUnset(int uid, int limit, long since) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -756,6 +879,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public long getHostCount(int uid, boolean usecache) {
+        /*if (!DatabaseHelper.enableTableAccess){
+            Log.e(TAG, "Access table is not created.");
+            return 0;
+        }*/
+
         if (usecache)
             synchronized (mapUidHosts) {
                 if (mapUidHosts.containsKey(uid))
@@ -780,6 +908,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // DNS
 
     public boolean insertDns(ResourceRecord rr) {
+        /*if (!DatabaseHelper.enableTableDns){
+            Log.e(TAG, "DNS table is not created.");
+            return false;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -822,6 +955,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void cleanupDns() {
+        /*if (!DatabaseHelper.enableTableDns){
+            Log.e(TAG, "DNS table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -842,6 +980,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void clearDns() {
+        /*if (!DatabaseHelper.enableTableDns){
+            Log.e(TAG, "DNS table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -859,6 +1002,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public String getQName(int uid, String ip) {
+        /*if (!DatabaseHelper.enableTableDns){
+            Log.e(TAG, "DNS table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -879,6 +1027,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAlternateQNames(String qname) {
+        /*if (!DatabaseHelper.enableTableDns){
+            Log.e(TAG, "DNS table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -910,6 +1063,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAccessDns(String dname) {
+        /*if (!DatabaseHelper.enableTableDns){
+            Log.e(TAG, "DNS table is not created.");
+            return null;
+        }*/
+
         long now = new Date().getTime();
         lock.readLock().lock();
         try {
@@ -935,6 +1093,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Forward
 
     public void addForward(int protocol, int dport, String raddr, int rport, int ruid) {
+        /*if (!DatabaseHelper.enableTableForward){
+            Log.e(TAG, "Forward table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -962,6 +1125,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void deleteForward() {
+        /*if (!DatabaseHelper.enableTableForward){
+            Log.e(TAG, "Forward table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -981,6 +1149,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void deleteForward(int protocol, int dport) {
+        /*if (!DatabaseHelper.enableTableForward){
+            Log.e(TAG, "Forward table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -1001,6 +1174,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getForwarding() {
+        /*if (!DatabaseHelper.enableTableForward){
+            Log.e(TAG, "Forward table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -1013,7 +1191,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // App
+
     public void addApp(String packageName, String label, boolean system, boolean internet, boolean enabled) {
+        /*if (!DatabaseHelper.enableTableApp){
+            Log.e(TAG, "App table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -1042,6 +1227,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getApp(String packageName) {
+        /*if (!DatabaseHelper.enableTableApp){
+            Log.e(TAG, "App table is not created.");
+            return null;
+        }*/
+
         lock.readLock().lock();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -1056,12 +1246,105 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void clearApps() {
+        /*if (!DatabaseHelper.enableTableApp){
+            Log.e(TAG, "App table is not created.");
+            return;
+        }*/
+
         lock.writeLock().lock();
         try {
             SQLiteDatabase db = this.getWritableDatabase();
             db.beginTransactionNonExclusive();
             try {
                 db.delete("app", null, null);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    // Flow (based on access and log, IPv6 is not supported (JNI))
+
+    public void insertFlow(Flow flow, String packageName){
+        /*if (!DatabaseHelper.enableTableFlow){
+            Log.e(TAG, "Flow table is not created.");
+            return;
+        }*/
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                ContentValues cv = new ContentValues();
+                cv.put("time", flow.Time);
+                cv.put("version", flow.Version);
+
+                if (flow.Protocol < 0)
+                    cv.putNull("protocol");
+                else
+                    cv.put("protocol", flow.Protocol);
+
+                cv.put("saddr", flow.SAddr);
+                if (flow.SPort < 0)
+                    cv.putNull("sport");
+                else
+                    cv.put("sport", flow.SPort);
+
+                cv.put("daddr", flow.DAddr);
+                if (flow.DPort < 0)
+                    cv.putNull("dport");
+                else
+                    cv.put("dport", flow.DPort);
+
+                cv.put("sent",flow.Sent);
+                cv.put("received",flow.Received);
+
+                /*if (flow.Uid < 0)
+                    cv.putNull("uid");
+                else
+                    cv.put("uid", flow.Uid);*/
+
+                if (packageName==null){
+                    cv.putNull("packageName");
+                }else{
+                    cv.put("packageName",packageName);
+                }
+
+                if (db.insert("flow", null, cv) == -1)
+                    Log.e(TAG, "Insert flow failed");
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
+    public void cleanupFlow(long time) {
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Flow table is not created.");
+            return;
+        }*/
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                // There an index on time
+                int rows = db.delete("flow", "time < ?", new String[]{Long.toString(time)});
+                Log.i(TAG, "Cleanup flow" +
+                        " before=" + SimpleDateFormat.getDateTimeInstance().format(new Date(time)) +
+                        " rows=" + rows);
+
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -1093,6 +1376,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void removeForwardChangedListener(ForwardChangedListener listener) {
         forwardChangedListeners.remove(listener);
+    }
+
+    public void addFlowChangedListener(FlowChangedListener listener) {
+        flowChangedListeners.add(listener);
+    }
+
+    public void removeFlowChangedListener(ForwardChangedListener listener) {
+        flowChangedListeners.remove(listener);
     }
 
     private void notifyLogChanged() {
@@ -1158,6 +1449,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public interface ForwardChangedListener {
+        void onChanged();
+    }
+
+    public interface FlowChangedListener {
         void onChanged();
     }
 }

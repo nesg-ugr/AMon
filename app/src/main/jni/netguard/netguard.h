@@ -531,6 +531,9 @@ jobject create_packet(const struct arguments *args,
 void account_usage(const struct arguments *args, jint version, jint protocol,
                    const char *daddr, jint dport, jint uid, jlong sent, jlong received);
 
+void capture_flow(const struct arguments *args, jint version, jint protocol,
+                  const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
+                  jlong sent, jlong received);
 void write_pcap_hdr();
 
 void write_pcap_rec(const uint8_t *buffer, size_t len);
