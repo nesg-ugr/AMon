@@ -264,6 +264,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ", dport INTEGER" +
                 ", sent INTEGER" +
                 ", received INTEGER" +
+                ", sentPackets INTEGER" +
+                ", receivedPackets INTEGER" +
                 ");");
     }
 
@@ -1300,6 +1302,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 cv.put("sent",flow.Sent);
                 cv.put("received",flow.Received);
+
+                cv.put("sentPackets",flow.SentPackets);
+                cv.put("receivedPackets",flow.ReceivedPackets);
 
                 /*if (flow.Uid < 0)
                     cv.putNull("uid");

@@ -71,9 +71,12 @@ int check_udp_session(const struct arguments *args, struct ng_session *s,
         account_usage(args, s->udp.version, IPPROTO_UDP,
                       dest, ntohs(s->udp.dest), s->udp.uid, s->udp.sent, s->udp.received);
         capture_flow(args, IPPROTO_UDP, source, ntohs(s->udp.source),
-                     dest, ntohs(s->udp.dest), s->udp.uid, s->udp.sent, s->udp.received);
+                     dest, ntohs(s->udp.dest), s->udp.uid,
+                     s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets);
         s->udp.sent = 0;
         s->udp.received = 0;
+        s->udp.sent_packets = 0;
+        s->udp.received_packets = 0;
     }
 
     // Cleanup lingering sessions
@@ -130,6 +133,7 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
                             bytes, dest, ntohs(s->udp.dest));
 
                 s->udp.received += bytes;
+                s->udp.received_packets += 1;
 
                 // Process DNS response
                 if (ntohs(s->udp.dest) == 53)
@@ -285,6 +289,8 @@ jboolean handle_udp(const struct arguments *args,
 
         s->udp.sent = 0;
         s->udp.received = 0;
+        s->udp.sent_packets = 0;
+        s->udp.received_packets = 0;
 
         if (version == 4) {
             s->udp.saddr.ip4 = (__be32) ip4->saddr;
@@ -399,8 +405,10 @@ jboolean handle_udp(const struct arguments *args,
             cur->udp.state = UDP_FINISHING;
             return 0;
         }
-    } else
+    } else {
         cur->udp.sent += datalen;
+        cur->udp.sent_packets += 1;
+    }
 
     return 1;
 }

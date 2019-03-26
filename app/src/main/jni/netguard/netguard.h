@@ -136,6 +136,9 @@ struct udp_session {
     uint64_t sent;
     uint64_t received;
 
+    int sent_packets;
+    int received_packets;
+
     union {
         __be32 ip4; // network notation
         struct in6_addr ip6;
@@ -172,6 +175,9 @@ struct tcp_session {
 
     uint64_t sent;
     uint64_t received;
+
+    int sent_packets;
+    int received_packets;
 
     union {
         __be32 ip4; // network notation
@@ -533,7 +539,7 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
 
 void capture_flow(const struct arguments *args, jint protocol,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
-                  jlong sent, jlong received);
+                  jlong sent, jlong received, jint sentpackets, jint receivedpackets);
 void write_pcap_hdr();
 
 void write_pcap_rec(const uint8_t *buffer, size_t len);

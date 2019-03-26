@@ -104,10 +104,13 @@ int check_tcp_session(const struct arguments *args, struct ng_session *s,
         account_usage(args, s->tcp.version, IPPROTO_TCP,
                       dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.sent, s->tcp.received);
         capture_flow(args, IPPROTO_TCP, source, ntohs(s->tcp.source),
-                      dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.sent, s->tcp.received);
+                      dest, ntohs(s->tcp.dest), s->tcp.uid,
+                      s->tcp.sent, s->tcp.received, s->tcp.sent_packets, s->tcp.received_packets);
 
         s->tcp.sent = 0;
         s->tcp.received = 0;
+        s->tcp.sent_packets = 0;
+        s->tcp.received_packets = 0;
     }
 
     // Cleanup lingering sessions
@@ -490,6 +493,7 @@ void check_tcp_socket(const struct arguments *args,
                         fwd = 1;
                         buffer_size -= sent;
                         s->tcp.sent += sent;
+                        s->tcp.sent_packets += 1;
                         s->tcp.forward->sent += sent;
                         s->tcp.remote_seq = s->tcp.forward->seq + s->tcp.forward->sent;
 
@@ -586,6 +590,7 @@ void check_tcp_socket(const struct arguments *args,
                         // Socket read data
                         log_android(ANDROID_LOG_DEBUG, "%s recv bytes %d", session, bytes);
                         s->tcp.received += bytes;
+                        s->tcp.received_packets += 1;
 
                         // Forward to tun
                         if (write_data(args, &s->tcp, buffer, (size_t) bytes) >= 0) {
@@ -726,6 +731,8 @@ jboolean handle_tcp(const struct arguments *args,
             s->tcp.last_keep_alive = 0;
             s->tcp.sent = 0;
             s->tcp.received = 0;
+            s->tcp.sent_packets = 0;
+            s->tcp.received_packets = 0;
 
             if (version == 4) {
                 s->tcp.saddr.ip4 = (__be32) ip4->saddr;

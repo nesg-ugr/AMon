@@ -139,7 +139,13 @@ public class ActivityMain extends AppCompatActivity {
         // Enable flow collecting
         collectFlow(true);
         // Enable PCAP file
-        //enablePcap(null);
+        enablePcap(null);
+        findViewById(R.id.pcapButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exportPcap();
+            }
+        });
 
         boolean enabled = prefs.getBoolean("enabled", false);
         boolean initialized = prefs.getBoolean("initialized", false);
