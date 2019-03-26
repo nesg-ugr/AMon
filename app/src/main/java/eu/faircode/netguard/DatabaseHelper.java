@@ -257,7 +257,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " ID INTEGER PRIMARY KEY AUTOINCREMENT" +
                 ", packageName TEXT" +
                 ", time INTEGER NOT NULL" +
-                ", version INTEGER" +
                 ", protocol INTEGER" +
                 ", saddr TEXT" +
                 ", sport INTEGER" +
@@ -1281,7 +1280,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 ContentValues cv = new ContentValues();
                 cv.put("time", flow.Time);
-                cv.put("version", flow.Version);
 
                 if (flow.Protocol < 0)
                     cv.putNull("protocol");
@@ -1351,6 +1349,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    public Cursor getFlow(long time){
+        lock.readLock().lock();
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+
+            //
+            String query = "SELECT * FROM flow WHERE time < ?";
+
+            return db.rawQuery(query, new String[]{Long.toString(time)});
+        } finally {
+            lock.readLock().unlock();
         }
     }
 

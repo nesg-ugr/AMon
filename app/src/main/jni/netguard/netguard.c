@@ -857,7 +857,6 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
 jmethodID midCaptureFlow = NULL;
 jmethodID midInitFlow = NULL;
 jfieldID fidFlowTime = NULL;
-jfieldID fidFlowVersion = NULL;
 jfieldID fidFlowProtocol = NULL;
 jfieldID fidFlowSAddr = NULL;
 jfieldID fidFlowSPort = NULL;
@@ -867,7 +866,7 @@ jfieldID fidFlowUid = NULL;
 jfieldID fidFlowSent = NULL;
 jfieldID fidFlowReceived = NULL;
 
-void capture_flow(const struct arguments *args, jint version, jint protocol,
+void capture_flow(const struct arguments *args, jint protocol,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
                   jlong sent, jlong received) {
 #ifdef PROFILE_JNI
@@ -891,7 +890,6 @@ void capture_flow(const struct arguments *args, jint version, jint protocol,
     if (fidFlowTime == NULL) {
         const char *string = "Ljava/lang/String;";
         fidFlowTime = jniGetFieldID(args->env, clsFlow, "Time", "J");
-        fidFlowVersion = jniGetFieldID(args->env, clsFlow, "Version", "I");
         fidFlowProtocol = jniGetFieldID(args->env, clsFlow, "Protocol", "I");
         fidFlowSAddr = jniGetFieldID(args->env, clsFlow, "SAddr", string);
         fidFlowSPort = jniGetFieldID(args->env, clsFlow, "SPort", "I");
@@ -907,7 +905,6 @@ void capture_flow(const struct arguments *args, jint version, jint protocol,
     jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
 
     (*args->env)->SetLongField(args->env, jflow, fidFlowTime, jtime);
-    (*args->env)->SetIntField(args->env, jflow, fidFlowVersion, version);
     (*args->env)->SetIntField(args->env, jflow, fidFlowProtocol, protocol);
     (*args->env)->SetObjectField(args->env, jflow, fidFlowSAddr, jsaddr);
     (*args->env)->SetIntField(args->env, jflow, fidFlowSPort, sport);

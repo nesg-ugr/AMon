@@ -7,7 +7,6 @@ import java.util.Date;
 public class Flow {
     public int Uid;
     public long Time;
-    public int Version;
     public int Protocol;
     public String SAddr;
     public int SPort;
@@ -21,7 +20,7 @@ public class Flow {
     @Override
     public String toString() {
         return formatter.format(new Date(Time).getTime()) +
-                " v" + Version + " p" + Protocol +
+                " p" + Protocol +
                 " " + SAddr + "/" + SPort +
                 " " + DAddr + "/" + DPort +
                 " uid " + Uid +

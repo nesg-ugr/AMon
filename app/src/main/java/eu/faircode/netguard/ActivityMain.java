@@ -138,6 +138,8 @@ public class ActivityMain extends AppCompatActivity {
         trackUsage(false);
         // Enable flow collecting
         collectFlow(true);
+        // Enable PCAP file
+        //enablePcap(null);
 
         boolean enabled = prefs.getBoolean("enabled", false);
         boolean initialized = prefs.getBoolean("initialized", false);

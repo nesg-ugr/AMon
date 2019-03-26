@@ -220,6 +220,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     public static void setPcap(boolean enabled, Context context) {
         setPcap(enabled,null,context);
     }
+
     public static void setPcap(boolean enabled, File pcap, Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
