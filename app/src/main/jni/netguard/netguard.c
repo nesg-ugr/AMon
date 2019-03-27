@@ -867,10 +867,12 @@ jfieldID fidFlowSent = NULL;
 jfieldID fidFlowReceived = NULL;
 jfieldID fidFlowSentPackets = NULL;
 jfieldID fidFlowReceivedPackets = NULL;
+jfieldID fidFlowTcpFlags = NULL;
 
 void capture_flow(const struct arguments *args, jint protocol,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
-                  jlong sent, jlong received, jint sentpackets, jint receivedpackets) {
+                  jlong sent, jlong received, jint sentpackets, jint receivedpackets,
+                  jint tcp_flags) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -902,7 +904,7 @@ void capture_flow(const struct arguments *args, jint protocol,
         fidFlowReceived = jniGetFieldID(args->env, clsFlow, "Received", "J");
         fidFlowSentPackets = jniGetFieldID(args->env, clsFlow, "SentPackets", "I");
         fidFlowReceivedPackets = jniGetFieldID(args->env, clsFlow, "ReceivedPackets", "I");
-
+        fidFlowTcpFlags = jniGetFieldID(args->env, clsFlow, "TcpFlags", "I");
     }
 
     jlong jtime = time(NULL) * 1000LL;
@@ -920,6 +922,7 @@ void capture_flow(const struct arguments *args, jint protocol,
     (*args->env)->SetLongField(args->env, jflow, fidFlowReceived, received);
     (*args->env)->SetIntField(args->env, jflow, fidFlowSentPackets, sentpackets);
     (*args->env)->SetIntField(args->env, jflow, fidFlowReceivedPackets, receivedpackets);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowTcpFlags, tcp_flags);
 
 
     (*args->env)->CallVoidMethod(args->env, args->instance, midCaptureFlow, jflow);

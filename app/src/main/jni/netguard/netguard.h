@@ -179,6 +179,19 @@ struct tcp_session {
     int sent_packets;
     int received_packets;
 
+    union{
+        uint8_t flags;
+        struct{
+        uint16_t fin:1;
+        uint16_t syn:1;
+        uint16_t rst:1;
+        uint16_t psh:1;
+        uint16_t ack:1;
+        uint16_t urg:1;
+        uint16_t res2:2;
+        };
+    };
+
     union {
         __be32 ip4; // network notation
         struct in6_addr ip6;
@@ -539,7 +552,8 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
 
 void capture_flow(const struct arguments *args, jint protocol,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
-                  jlong sent, jlong received, jint sentpackets, jint receivedpackets);
+                  jlong sent, jlong received, jint sentpackets, jint receivedpackets,
+                  jint tcp_flags);
 void write_pcap_hdr();
 
 void write_pcap_rec(const uint8_t *buffer, size_t len);

@@ -266,6 +266,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ", received INTEGER" +
                 ", sentPackets INTEGER" +
                 ", receivedPackets INTEGER" +
+                ", tcpFlags INTEGER " +
                 ");");
     }
 
@@ -1305,6 +1306,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 cv.put("sentPackets",flow.SentPackets);
                 cv.put("receivedPackets",flow.ReceivedPackets);
+
+                if(flow.Protocol == 6){
+                    cv.put("tcpFlags", flow.TcpFlags);
+                }else{
+                    cv.putNull("tcpFlags");
+                }
+
 
                 /*if (flow.Uid < 0)
                     cv.putNull("uid");

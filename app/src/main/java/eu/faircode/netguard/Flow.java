@@ -16,6 +16,7 @@ public class Flow {
     public long Received;
     public int SentPackets;
     public int ReceivedPackets;
+    public int TcpFlags;
 
     private static DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
 
@@ -27,6 +28,7 @@ public class Flow {
                 " " + DAddr + "/" + DPort +
                 " uid " + Uid +
                 " Bytes " + " out " + Sent + " in " + Received +
-                " Packets " + " out " + SentPackets + " in " + ReceivedPackets;
+                " Packets " + " out " + SentPackets + " in " + ReceivedPackets +
+                " Flags " + TcpFlags;
     }
 }

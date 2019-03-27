@@ -216,7 +216,7 @@ void *handle_events(void *a) {
                 } else if (ev[i].data.ptr == NULL) {
                     // Check upstream
                     log_android(ANDROID_LOG_DEBUG, "epoll ready %d/%d in %d out %d err %d hup %d",
-                                i, ready,
+                                  i, ready,
                                 (ev[i].events & EPOLLIN) != 0,
                                 (ev[i].events & EPOLLOUT) != 0,
                                 (ev[i].events & EPOLLERR) != 0,

@@ -105,12 +105,14 @@ int check_tcp_session(const struct arguments *args, struct ng_session *s,
                       dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.sent, s->tcp.received);
         capture_flow(args, IPPROTO_TCP, source, ntohs(s->tcp.source),
                       dest, ntohs(s->tcp.dest), s->tcp.uid,
-                      s->tcp.sent, s->tcp.received, s->tcp.sent_packets, s->tcp.received_packets);
+                      s->tcp.sent, s->tcp.received, s->tcp.sent_packets, s->tcp.received_packets,
+                      s->tcp.flags);
 
         s->tcp.sent = 0;
         s->tcp.received = 0;
         s->tcp.sent_packets = 0;
         s->tcp.received_packets = 0;
+        s->tcp.flags = 0;
     }
 
     // Cleanup lingering sessions
@@ -497,6 +499,9 @@ void check_tcp_socket(const struct arguments *args,
                         s->tcp.forward->sent += sent;
                         s->tcp.remote_seq = s->tcp.forward->seq + s->tcp.forward->sent;
 
+                        // Log TCP flags
+                        s->tcp.psh = (uint16_t) s->tcp.forward->psh;
+
                         if (s->tcp.forward->len == s->tcp.forward->sent) {
                             struct segment *p = s->tcp.forward;
                             s->tcp.forward = s->tcp.forward->next;
@@ -733,6 +738,8 @@ jboolean handle_tcp(const struct arguments *args,
             s->tcp.received = 0;
             s->tcp.sent_packets = 0;
             s->tcp.received_packets = 0;
+            s->tcp.flags = 0;
+            s->tcp.flags = (uint8_t) (tcphdr->th_flags & 0xffu);
 
             if (version == 4) {
                 s->tcp.saddr.ip4 = (__be32) ip4->saddr;
@@ -821,6 +828,9 @@ jboolean handle_tcp(const struct arguments *args,
                 cur->tcp.local_seq - cur->tcp.local_start,
                 cur->tcp.remote_seq - cur->tcp.remote_start,
                 cur->tcp.acked - cur->tcp.local_start);
+
+        // Log TCP flags
+        args->ctx->ng_session->tcp.flags = (uint8_t) (tcphdr->th_flags & 0xffu);
 
         // Session found
         if (cur->tcp.state == TCP_CLOSING || cur->tcp.state == TCP_CLOSE) {
@@ -1124,6 +1134,11 @@ int write_syn_ack(const struct arguments *args, struct tcp_session *cur) {
         cur->state = TCP_CLOSING;
         return -1;
     }
+
+    // Log TCP flags
+    cur->ack = 1;
+    cur->syn = 1;
+
     return 0;
 }
 
@@ -1132,6 +1147,10 @@ int write_ack(const struct arguments *args, struct tcp_session *cur) {
         cur->state = TCP_CLOSING;
         return -1;
     }
+
+    // Log TCP flags
+    cur->ack = 1;
+
     return 0;
 }
 
@@ -1141,6 +1160,9 @@ int write_data(const struct arguments *args, struct tcp_session *cur,
         cur->state = TCP_CLOSING;
         return -1;
     }
+    // Log TCP flags
+    cur->ack = 1;
+
     return 0;
 }
 
@@ -1149,6 +1171,11 @@ int write_fin_ack(const struct arguments *args, struct tcp_session *cur) {
         cur->state = TCP_CLOSING;
         return -1;
     }
+
+    // Log TCP flags
+    cur->fin = 1;
+    cur->ack = 1;
+
     return 0;
 }
 
@@ -1160,6 +1187,11 @@ void write_rst(const struct arguments *args, struct tcp_session *cur) {
         cur->remote_seq++; // SYN
     }
     write_tcp(args, cur, NULL, 0, 0, ack, 0, 1);
+
+    // Log TCP flags
+    cur->ack = (uint16_t) ack;
+    cur->rst = 1;
+
     if (cur->state != TCP_CLOSE)
         cur->state = TCP_CLOSING;
 }
@@ -1250,6 +1282,7 @@ ssize_t write_tcp(const struct arguments *args, const struct tcp_session *cur,
     tcp->fin = (__u16) fin;
     tcp->rst = (__u16) rst;
     tcp->window = htons(cur->recv_window >> cur->recv_scale);
+
 
     if (!tcp->ack)
         tcp->ack_seq = 0;

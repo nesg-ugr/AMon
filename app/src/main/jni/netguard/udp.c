@@ -72,7 +72,7 @@ int check_udp_session(const struct arguments *args, struct ng_session *s,
                       dest, ntohs(s->udp.dest), s->udp.uid, s->udp.sent, s->udp.received);
         capture_flow(args, IPPROTO_UDP, source, ntohs(s->udp.source),
                      dest, ntohs(s->udp.dest), s->udp.uid,
-                     s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets);
+                     s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets, 0);
         s->udp.sent = 0;
         s->udp.received = 0;
         s->udp.sent_packets = 0;
