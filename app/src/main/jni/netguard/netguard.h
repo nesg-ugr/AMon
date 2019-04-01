@@ -128,6 +128,7 @@ struct icmp_session {
 #define UDP_BLOCKED 3
 
 struct udp_session {
+    time_t start_time;
     time_t time;
     jint uid;
     int version;
@@ -156,6 +157,7 @@ struct udp_session {
 
 struct tcp_session {
     jint uid;
+    time_t start_time;
     time_t time;
     int version;
     uint16_t mss;
@@ -550,7 +552,7 @@ jobject create_packet(const struct arguments *args,
 void account_usage(const struct arguments *args, jint version, jint protocol,
                    const char *daddr, jint dport, jint uid, jlong sent, jlong received);
 
-void capture_flow(const struct arguments *args, jint protocol,
+void capture_flow(const struct arguments *args, jint protocol, jlong start_time, jlong end_time,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
                   jlong sent, jlong received, jint sentpackets, jint receivedpackets,
                   jint tcp_flags);

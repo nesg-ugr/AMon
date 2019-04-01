@@ -257,6 +257,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " ID INTEGER PRIMARY KEY AUTOINCREMENT" +
                 ", packageName TEXT" +
                 ", time INTEGER NOT NULL" +
+                ", duration INTEGER NOT NULL" +
                 ", protocol INTEGER" +
                 ", saddr TEXT" +
                 ", sport INTEGER" +
@@ -1283,6 +1284,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 ContentValues cv = new ContentValues();
                 cv.put("time", flow.Time);
+                cv.put("duration", flow.Duration);
 
                 if (flow.Protocol < 0)
                     cv.putNull("protocol");

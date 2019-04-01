@@ -857,6 +857,7 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
 jmethodID midCaptureFlow = NULL;
 jmethodID midInitFlow = NULL;
 jfieldID fidFlowTime = NULL;
+jfieldID fidFlowDuration = NULL;
 jfieldID fidFlowProtocol = NULL;
 jfieldID fidFlowSAddr = NULL;
 jfieldID fidFlowSPort = NULL;
@@ -869,7 +870,7 @@ jfieldID fidFlowSentPackets = NULL;
 jfieldID fidFlowReceivedPackets = NULL;
 jfieldID fidFlowTcpFlags = NULL;
 
-void capture_flow(const struct arguments *args, jint protocol,
+void capture_flow(const struct arguments *args, jint protocol, jlong start_time, jlong end_time,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
                   jlong sent, jlong received, jint sentpackets, jint receivedpackets,
                   jint tcp_flags) {
@@ -894,6 +895,7 @@ void capture_flow(const struct arguments *args, jint protocol,
     if (fidFlowTime == NULL) {
         const char *string = "Ljava/lang/String;";
         fidFlowTime = jniGetFieldID(args->env, clsFlow, "Time", "J");
+        fidFlowDuration = jniGetFieldID(args->env, clsFlow, "Duration", "J");
         fidFlowProtocol = jniGetFieldID(args->env, clsFlow, "Protocol", "I");
         fidFlowSAddr = jniGetFieldID(args->env, clsFlow, "SAddr", string);
         fidFlowSPort = jniGetFieldID(args->env, clsFlow, "SPort", "I");
@@ -907,11 +909,14 @@ void capture_flow(const struct arguments *args, jint protocol,
         fidFlowTcpFlags = jniGetFieldID(args->env, clsFlow, "TcpFlags", "I");
     }
 
-    jlong jtime = time(NULL) * 1000LL;
+    // Need to be checked
+    jlong jstarttime = start_time * 1000LL;
+    jlong jduration = (end_time - start_time) * 1000L;
     jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
     jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
 
-    (*args->env)->SetLongField(args->env, jflow, fidFlowTime, jtime);
+    (*args->env)->SetLongField(args->env, jflow, fidFlowTime, jstarttime);
+    (*args->env)->SetLongField(args->env, jflow, fidFlowDuration, jduration);
     (*args->env)->SetIntField(args->env, jflow, fidFlowProtocol, protocol);
     (*args->env)->SetObjectField(args->env, jflow, fidFlowSAddr, jsaddr);
     (*args->env)->SetIntField(args->env, jflow, fidFlowSPort, sport);
