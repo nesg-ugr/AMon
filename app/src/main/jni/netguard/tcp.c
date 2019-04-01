@@ -104,7 +104,7 @@ int check_tcp_session(const struct arguments *args, struct ng_session *s,
         account_usage(args, s->tcp.version, IPPROTO_TCP,
                       dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.sent, s->tcp.received);
         capture_flow(args, IPPROTO_TCP, s->tcp.start_time, s->tcp.time, source, ntohs(s->tcp.source),
-                      dest, ntohs(s->tcp.dest), s->tcp.uid,
+                      dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.src_tos,
                       s->tcp.sent, s->tcp.received, s->tcp.sent_packets, s->tcp.received_packets,
                       s->tcp.flags);
 
@@ -725,6 +725,7 @@ jboolean handle_tcp(const struct arguments *args,
             s->tcp.uid = uid;
             s->tcp.version = version;
             s->tcp.mss = mss;
+            s->tcp.src_tos = ip4->tos;
             s->tcp.recv_scale = ws;
             s->tcp.send_scale = ws;
             s->tcp.send_window = ((uint32_t) ntohs(tcphdr->window)) << s->tcp.send_scale;

@@ -864,6 +864,7 @@ jfieldID fidFlowSPort = NULL;
 jfieldID fidFlowDAddr = NULL;
 jfieldID fidFlowDPort = NULL;
 jfieldID fidFlowUid = NULL;
+jfieldID fidFlowTos = NULL;
 jfieldID fidFlowSent = NULL;
 jfieldID fidFlowReceived = NULL;
 jfieldID fidFlowSentPackets = NULL;
@@ -871,7 +872,7 @@ jfieldID fidFlowReceivedPackets = NULL;
 jfieldID fidFlowTcpFlags = NULL;
 
 void capture_flow(const struct arguments *args, jint protocol, jlong start_time, jlong end_time,
-                  const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
+                  const char *saddr, jint sport, const char *daddr, jint dport, jint uid, jint tos,
                   jlong sent, jlong received, jint sentpackets, jint receivedpackets,
                   jint tcp_flags) {
 #ifdef PROFILE_JNI
@@ -902,6 +903,7 @@ void capture_flow(const struct arguments *args, jint protocol, jlong start_time,
         fidFlowDAddr = jniGetFieldID(args->env, clsFlow, "DAddr", string);
         fidFlowDPort = jniGetFieldID(args->env, clsFlow, "DPort", "I");
         fidFlowUid = jniGetFieldID(args->env, clsFlow, "Uid", "I");
+        fidFlowTos = jniGetFieldID(args->env, clsFlow, "Tos", "I");
         fidFlowSent = jniGetFieldID(args->env, clsFlow, "Sent", "J");
         fidFlowReceived = jniGetFieldID(args->env, clsFlow, "Received", "J");
         fidFlowSentPackets = jniGetFieldID(args->env, clsFlow, "SentPackets", "I");
@@ -923,6 +925,7 @@ void capture_flow(const struct arguments *args, jint protocol, jlong start_time,
     (*args->env)->SetObjectField(args->env, jflow, fidFlowDAddr, jdaddr);
     (*args->env)->SetIntField(args->env, jflow, fidFlowDPort, dport);
     (*args->env)->SetIntField(args->env, jflow, fidFlowUid, uid);
+    (*args->env)->SetIntField(args->env, jflow, fidFlowTos, tos);
     (*args->env)->SetLongField(args->env, jflow, fidFlowSent, sent);
     (*args->env)->SetLongField(args->env, jflow, fidFlowReceived, received);
     (*args->env)->SetIntField(args->env, jflow, fidFlowSentPackets, sentpackets);

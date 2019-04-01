@@ -71,7 +71,7 @@ int check_udp_session(const struct arguments *args, struct ng_session *s,
         account_usage(args, s->udp.version, IPPROTO_UDP,
                       dest, ntohs(s->udp.dest), s->udp.uid, s->udp.sent, s->udp.received);
         capture_flow(args, IPPROTO_UDP, s->udp.start_time, s->udp.time, source, ntohs(s->udp.source),
-                     dest, ntohs(s->udp.dest), s->udp.uid,
+                     dest, ntohs(s->udp.dest), s->udp.uid, s->udp.src_tos,
                      s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets, 0);
         s->udp.sent = 0;
         s->udp.received = 0;
@@ -287,6 +287,8 @@ jboolean handle_udp(const struct arguments *args,
         else
             rversion = (strstr(redirect->raddr, ":") == NULL ? 4 : 6);
         s->udp.mss = (uint16_t) (rversion == 4 ? UDP4_MAXMSG : UDP6_MAXMSG);
+
+        s->udp.src_tos = ip4->tos;
 
         s->udp.sent = 0;
         s->udp.received = 0;

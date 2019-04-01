@@ -134,6 +134,8 @@ struct udp_session {
     int version;
     uint16_t mss;
 
+    int8_t src_tos;
+
     uint64_t sent;
     uint64_t received;
 
@@ -166,6 +168,8 @@ struct tcp_session {
     uint32_t recv_window; // host notation, scaled
     uint32_t send_window; // host notation, scaled
     uint16_t unconfirmed; // packets
+
+    int8_t src_tos;
 
     uint32_t remote_seq; // confirmed bytes received, host notation
     uint32_t local_seq; // confirmed bytes sent, host notation
@@ -553,7 +557,7 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
                    const char *daddr, jint dport, jint uid, jlong sent, jlong received);
 
 void capture_flow(const struct arguments *args, jint protocol, jlong start_time, jlong end_time,
-                  const char *saddr, jint sport, const char *daddr, jint dport, jint uid,
+                  const char *saddr, jint sport, const char *daddr, jint dport, jint uid, jint tos,
                   jlong sent, jlong received, jint sentpackets, jint receivedpackets,
                   jint tcp_flags);
 void write_pcap_hdr();

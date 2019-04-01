@@ -268,6 +268,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ", sentPackets INTEGER" +
                 ", receivedPackets INTEGER" +
                 ", tcpFlags INTEGER " +
+                ", ToS INTEGER " +
                 ");");
     }
 
@@ -1314,6 +1315,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }else{
                     cv.putNull("tcpFlags");
                 }
+
+                cv.put("ToS", flow.Tos);
 
 
                 /*if (flow.Uid < 0)
