@@ -911,14 +911,12 @@ void capture_flow(const struct arguments *args, jint protocol, jlong start_time,
         fidFlowTcpFlags = jniGetFieldID(args->env, clsFlow, "TcpFlags", "I");
     }
 
-    // Need to be checked
-    jlong jstarttime = start_time * 1000LL;
-    jlong jduration = (end_time - start_time) * 1000L;
+
     jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
     jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
 
-    (*args->env)->SetLongField(args->env, jflow, fidFlowTime, jstarttime);
-    (*args->env)->SetLongField(args->env, jflow, fidFlowDuration, jduration);
+    (*args->env)->SetLongField(args->env, jflow, fidFlowTime, start_time);
+    (*args->env)->SetLongField(args->env, jflow, fidFlowDuration, end_time-start_time);
     (*args->env)->SetIntField(args->env, jflow, fidFlowProtocol, protocol);
     (*args->env)->SetObjectField(args->env, jflow, fidFlowSAddr, jsaddr);
     (*args->env)->SetIntField(args->env, jflow, fidFlowSPort, sport);
