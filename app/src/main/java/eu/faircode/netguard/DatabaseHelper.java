@@ -1370,6 +1370,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // WIP
+    public void cleanupEndedFlow(long time) {
+        // TODO: Add boolean check to the where statement. Only delete ended flows.
+        //  Adjust server side to handle boolean insertion and update.
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Flow table is not created.");
+            return;
+        }*/
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                // There an index on time
+                int rows = db.delete("flow", "time < ?", new String[]{Long.toString(time)});
+                Log.i(TAG, "Cleanup flow" +
+                        " before=" + SimpleDateFormat.getDateTimeInstance().format(new Date(time)) +
+                        " rows=" + rows);
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     public Cursor getFlow(long time){
         lock.readLock().lock();
         try {

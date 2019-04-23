@@ -774,6 +774,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ServiceSinkhole.this);
                 boolean collect_flow = prefs.getBoolean("collect_flow", false);
                 if(collect_flow){
+                    // TODO: Change to use getNameForUid()
                     ApplicationInfo info = null;
                     PackageManager pm = ServiceSinkhole.this.getPackageManager();
                     String[] pkg = pm.getPackagesForUid(flow.Uid);

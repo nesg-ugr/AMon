@@ -85,4 +85,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     annotationProcessor 'androidx.annotation:annotation:1.0.2'
     // https://bumptech.github.io/glide/
+
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+
 }
