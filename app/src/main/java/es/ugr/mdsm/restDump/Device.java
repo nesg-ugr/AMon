@@ -13,10 +13,10 @@ public class Device {
 
     /**
      *
-     * @param mac
-     * @param sdk
+     * @param mac MAC address of the device
+     * @param sdk SDK of the Android Build
      */
-    public Device(String mac, Integer sdk) {
+    Device(String mac, Integer sdk) {
         super();
         this.mac = mac;
         this.sdk = sdk;

@@ -78,6 +78,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import es.ugr.mdsm.restDump.DbDumper;
+
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = "NetGuard.Main";
 
@@ -154,6 +156,10 @@ public class ActivityMain extends AppCompatActivity {
         ReceiverAutostart.upgrade(initialized, this);
         //prefs.edit().putBoolean("lockdown_wifi",false).apply();
         //prefs.edit().putBoolean("lockdown_other",false).apply();
+
+        DbDumper dbDumper = new DbDumper(20000, this);
+        dbDumper.dumpDeviceInfo();
+        //dbDumper.start();
 
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);
