@@ -2,7 +2,6 @@ package es.ugr.mdsm.restDump;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import eu.faircode.netguard.Flow;
 
 public class GFlow {
 
@@ -11,10 +10,10 @@ public class GFlow {
     private String packageName;
     @SerializedName("time")
     @Expose
-    private Integer time;
+    private Long time;
     @SerializedName("duration")
     @Expose
-    private Integer duration;
+    private Long duration;
     @SerializedName("protocol")
     @Expose
     private Integer protocol;
@@ -32,10 +31,10 @@ public class GFlow {
     private Integer dport;
     @SerializedName("sentBytes")
     @Expose
-    private Integer sentBytes;
+    private Long sentBytes;
     @SerializedName("receivedBytes")
     @Expose
-    private Integer receivedBytes;
+    private Long receivedBytes;
     @SerializedName("sentPackets")
     @Expose
     private Integer sentPackets;
@@ -73,7 +72,7 @@ public class GFlow {
      * @param tcpFlags
      * @param sentPackets
      */
-    public GFlow(String packageName, Integer time, Integer duration, Integer protocol, String saddr, Integer sport, String daddr, Integer dport, Integer sentBytes, Integer receivedBytes, Integer sentPackets, Integer receivedPackets, Integer tcpFlags, Integer toS) {
+    public GFlow(String packageName, Long time, Long duration, Integer protocol, String saddr, Integer sport, String daddr, Integer dport, Long sentBytes, Long receivedBytes, Integer sentPackets, Integer receivedPackets, Integer tcpFlags, Integer toS) {
         super();
         this.packageName = packageName;
         this.time = time;
@@ -99,19 +98,19 @@ public class GFlow {
         this.packageName = packageName;
     }
 
-    public Integer getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(Integer time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 
-    public Integer getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
-    public void setDuration(Integer duration) {
+    public void setDuration(Long duration) {
         this.duration = duration;
     }
 
@@ -155,19 +154,19 @@ public class GFlow {
         this.dport = dport;
     }
 
-    public Integer getSentBytes() {
+    public Long getSentBytes() {
         return sentBytes;
     }
 
-    public void setSentBytes(Integer sentBytes) {
+    public void setSentBytes(Long sentBytes) {
         this.sentBytes = sentBytes;
     }
 
-    public Integer getReceivedBytes() {
+    public Long getReceivedBytes() {
         return receivedBytes;
     }
 
-    public void setReceivedBytes(Integer receivedBytes) {
+    public void setReceivedBytes(Long receivedBytes) {
         this.receivedBytes = receivedBytes;
     }
 
@@ -203,4 +202,23 @@ public class GFlow {
         this.toS = toS;
     }
 
+    @Override
+    public String toString() {
+        return "GFlow{" +
+                "packageName='" + packageName + '\'' +
+                ", time=" + time +
+                ", duration=" + duration +
+                ", protocol=" + protocol +
+                ", saddr='" + saddr + '\'' +
+                ", sport=" + sport +
+                ", daddr='" + daddr + '\'' +
+                ", dport=" + dport +
+                ", sentBytes=" + sentBytes +
+                ", receivedBytes=" + receivedBytes +
+                ", sentPackets=" + sentPackets +
+                ", receivedPackets=" + receivedPackets +
+                ", tcpFlags=" + tcpFlags +
+                ", toS=" + toS +
+                '}';
+    }
 }

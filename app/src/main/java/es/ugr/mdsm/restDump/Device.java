@@ -1,4 +1,6 @@
 package es.ugr.mdsm.restDump;
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -38,4 +40,11 @@ public class Device {
         this.sdk = sdk;
     }
 
+    @Override
+    public String toString() {
+        return "Device{" +
+                "mac='" + mac + '\'' +
+                ", sdk=" + sdk +
+                '}';
+    }
 }

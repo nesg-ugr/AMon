@@ -159,7 +159,7 @@ struct udp_session {
 
 struct tcp_session {
     jint uid;
-    time_t start_time;
+    uint64_t start_time;
     time_t time;
     int version;
     uint16_t mss;
@@ -577,3 +577,5 @@ int is_readable(int fd);
 int is_writable(int fd);
 
 long long get_ms();
+
+long long get_ms_epoch();

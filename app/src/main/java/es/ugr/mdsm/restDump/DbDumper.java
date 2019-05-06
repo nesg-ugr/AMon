@@ -17,7 +17,6 @@ import eu.faircode.netguard.Util;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -35,6 +34,7 @@ public class DbDumper {
     private Runnable asyncUpdate;
     private Runnable devicePush;
     private Api api;
+    private DatabaseHelper dh;
 
     public DbDumper(int interval, Context context){
         mInterval = interval;
@@ -66,6 +66,7 @@ public class DbDumper {
                 .build();
 
         api = retrofit.create(Api.class);
+        dh = DatabaseHelper.getInstance(mContext);
     }
 
     public void start(){
@@ -85,26 +86,31 @@ public class DbDumper {
     }
 
     private void dataDump(){
-        long now = Calendar.getInstance().getTimeInMillis();
-        DatabaseHelper dh = DatabaseHelper.getInstance(mContext);
+        final long now = Calendar.getInstance().getTimeInMillis();
         List<GFlow> gFlows = new ArrayList<>();
         FlowDump flowDump;
         Gson gson = new Gson();
 
         // Read flows since now
         Cursor cursor = dh.getFlow(now);
+
+        if(cursor.getCount() <= 0){
+            Log.d(TAG, "There's no flow entry to send");
+            return;
+        }
+
         while (cursor.moveToNext()){
             gFlows.add(new GFlow(
                     cursor.getString(cursor.getColumnIndex("packageName")),
-                    cursor.getInt(cursor.getColumnIndex("time")),
-                    cursor.getInt(cursor.getColumnIndex("duration")),
+                    cursor.getLong(cursor.getColumnIndex("time")),
+                    cursor.getLong(cursor.getColumnIndex("duration")),
                     cursor.getInt(cursor.getColumnIndex("protocol")),
                     cursor.getString(cursor.getColumnIndex("saddr")),
                     cursor.getInt(cursor.getColumnIndex("sport")),
                     cursor.getString(cursor.getColumnIndex("daddr")),
                     cursor.getInt(cursor.getColumnIndex("dport")),
-                    cursor.getInt(cursor.getColumnIndex("sentBytes")),
-                    cursor.getInt(cursor.getColumnIndex("receivedBytes")),
+                    cursor.getLong(cursor.getColumnIndex("sent")),
+                    cursor.getLong(cursor.getColumnIndex("received")),
                     cursor.getInt(cursor.getColumnIndex("sentPackets")),
                     cursor.getInt(cursor.getColumnIndex("receivedPackets")),
                     cursor.getInt(cursor.getColumnIndex("tcpFlags")),
@@ -114,16 +120,14 @@ public class DbDumper {
 
         flowDump = new FlowDump(Util.getMacAddress().replace(":",""), gFlows);
 
-        // Create Gson object
-        gson.toJson(flowDump);
+        //Log.d(TAG, flowDump.toString());
+        Log.d(TAG, gson.toJson(flowDump));
 
         // Post data
         api.postFlows(flowDump)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Response<Void>>(){
-
-
                     @Override
                     public void onSubscribe(Disposable d) {
 
@@ -133,6 +137,8 @@ public class DbDumper {
                     public void onNext(Response response) {
                         if(response.isSuccessful()){
                             Log.i(TAG, "Successful flows POST");
+                            // Remove only ended flows
+                            dh.cleanupEndedFlow(now);
                         }else{
                             Log.w(TAG, "Failed to POST flows");
                         }
@@ -141,7 +147,7 @@ public class DbDumper {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        Log.e(TAG,"Error in flows POST",e);
                     }
 
                     @Override
@@ -149,9 +155,6 @@ public class DbDumper {
 
                     }
                 });
-
-        // Remove only ended flows
-        dh.cleanupEndedFlow(now);
 
     }
 
@@ -185,7 +188,7 @@ public class DbDumper {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        Log.e(TAG,"Error in device POST",e);
                     }
 
                     @Override

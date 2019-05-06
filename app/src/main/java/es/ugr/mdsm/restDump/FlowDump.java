@@ -46,4 +46,11 @@ public class FlowDump {
         this.flows = flows;
     }
 
+    @Override
+    public String toString() {
+        return "FlowDump{" +
+                "mac='" + mac + '\'' +
+                ", flows=" + flows.toString() +
+                '}';
+    }
 }

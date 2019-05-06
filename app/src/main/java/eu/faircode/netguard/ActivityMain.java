@@ -97,6 +97,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final int REQUEST_LOGCAT = 2;
     public static final int REQUEST_ROAMING = 3;
     public static final int REQUEST_PCAP = 4;
+    public static final int INTERVAL_UPDATE = 5*60*1000;
 
     private static final int MIN_SDK = Build.VERSION_CODES.LOLLIPOP_MR1;
 
@@ -157,9 +158,9 @@ public class ActivityMain extends AppCompatActivity {
         //prefs.edit().putBoolean("lockdown_wifi",false).apply();
         //prefs.edit().putBoolean("lockdown_other",false).apply();
 
-        DbDumper dbDumper = new DbDumper(20000, this);
+        DbDumper dbDumper = new DbDumper(20*1000, this);
         dbDumper.dumpDeviceInfo();
-        //dbDumper.start();
+        dbDumper.start();
 
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);

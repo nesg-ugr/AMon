@@ -74,6 +74,9 @@ android {
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "false"
             buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
             buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
+
+            // TODO: Need to be removed
+            manifestPlaceholders = [usesCleartextTraffic:"true"]
         }
     }
 }

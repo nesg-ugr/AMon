@@ -70,7 +70,7 @@ int check_udp_session(const struct arguments *args, struct ng_session *s,
     if (s->udp.state == UDP_CLOSED && (s->udp.sent || s->udp.received)) {
         account_usage(args, s->udp.version, IPPROTO_UDP,
                       dest, ntohs(s->udp.dest), s->udp.uid, s->udp.sent, s->udp.received);
-        capture_flow(args, IPPROTO_UDP, s->udp.start_time, get_ms(), source, ntohs(s->udp.source),
+        capture_flow(args, IPPROTO_UDP, s->udp.start_time, get_ms_epoch(), source, ntohs(s->udp.source),
                      dest, ntohs(s->udp.dest), s->udp.uid, s->udp.src_tos,
                      s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets, 0);
         s->udp.sent = 0;
@@ -276,7 +276,7 @@ jboolean handle_udp(const struct arguments *args,
         struct ng_session *s = malloc(sizeof(struct ng_session));
         s->protocol = IPPROTO_UDP;
 
-        s->udp.start_time = get_ms();
+        s->udp.start_time = get_ms_epoch();
         s->udp.time = time(NULL);
         s->udp.uid = uid;
         s->udp.version = version;
