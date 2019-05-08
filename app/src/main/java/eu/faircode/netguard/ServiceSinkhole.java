@@ -786,7 +786,14 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                     }
                     DatabaseHelper dh = DatabaseHelper.getInstance(ServiceSinkhole.this);
                     Log.i(TAG, "Collected flow " + flow);
-                    dh.insertFlow(flow, info==null ? null : info.packageName);
+                    /*if(flow.NewFlow){
+                        Log.d(TAG, "Inserting flow: "+flow);
+                        dh.insertFlow(flow, info==null ? null : info.packageName);
+                    }else{
+                        Log.d(TAG, "Updating flow: "+flow);
+                        dh.updateFlow(flow, info==null ? null : info.packageName);
+                    }*/
+                    dh.compactFlow(flow, info==null ? null : info.packageName);
                 }
             }
         }

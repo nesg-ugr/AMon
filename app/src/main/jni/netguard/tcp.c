@@ -106,13 +106,22 @@ int check_tcp_session(const struct arguments *args, struct ng_session *s,
         capture_flow(args, IPPROTO_TCP, s->tcp.start_time, get_ms_epoch(), source, ntohs(s->tcp.source),
                       dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.src_tos,
                       s->tcp.sent, s->tcp.received, s->tcp.sent_packets, s->tcp.received_packets,
-                      s->tcp.flags);
+                      s->tcp.flags, !s->tcp.times_measured, JNI_TRUE);
 
         s->tcp.sent = 0;
         s->tcp.received = 0;
         s->tcp.sent_packets = 0;
         s->tcp.received_packets = 0;
         s->tcp.flags = 0;
+    } else if (s->tcp.state != TCP_CLOSE && (get_ms_epoch() - s->tcp.start_time)/ACTIVE_FLOW_LIFETIME > s->tcp.times_measured){
+        log_android(ANDROID_LOG_INFO, "TCP Netflow capture parsed %d times %d sec state %d from %s/%u to %s/%u",
+                    s->tcp.times_measured, now - s->tcp.time, s->tcp.state,
+                    source, ntohs(s->tcp.source), dest, ntohs(s->tcp.dest));
+        capture_flow(args, IPPROTO_TCP, s->tcp.start_time, get_ms_epoch(), source, ntohs(s->tcp.source),
+                     dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.src_tos,
+                     s->tcp.sent, s->tcp.received, s->tcp.sent_packets, s->tcp.received_packets,
+                     s->tcp.flags, !s->tcp.times_measured, JNI_FALSE);
+        s->tcp.times_measured++;
     }
 
     // Cleanup lingering sessions
@@ -742,6 +751,7 @@ jboolean handle_tcp(const struct arguments *args,
             s->tcp.received_packets = 0;
             s->tcp.flags = 0;
             s->tcp.flags = (uint8_t) (tcphdr->th_flags & 0xffu);
+            s->tcp.times_measured = 0;
 
             if (version == 4) {
                 s->tcp.saddr.ip4 = (__be32) ip4->saddr;

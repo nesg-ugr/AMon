@@ -269,6 +269,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ", receivedPackets INTEGER" +
                 ", tcpFlags INTEGER " +
                 ", ToS INTEGER " +
+                ", NewFlow INTEGER " +
+                ", Finished INTEGER " +
                 ");");
     }
 
@@ -1318,6 +1320,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 cv.put("ToS", flow.Tos);
 
+                cv.put("NewFlow", flow.NewFlow);
+                cv.put("Finished", flow.Finished);
 
                 /*if (flow.Uid < 0)
                     cv.putNull("uid");
@@ -1333,6 +1337,189 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (db.insert("flow", null, cv) == -1)
                     Log.e(TAG, "Insert flow failed");
 
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
+    // Replace with the latest instance of the flow
+    public void updateFlow(Flow flow, String packageName){
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                ContentValues cv = new ContentValues();
+                cv.put("time", flow.Time);
+                cv.put("duration", flow.Duration);
+
+                if (flow.Protocol < 0)
+                    cv.putNull("protocol");
+                else
+                    cv.put("protocol", flow.Protocol);
+
+                cv.put("saddr", flow.SAddr);
+                if (flow.SPort < 0)
+                    cv.putNull("sport");
+                else
+                    cv.put("sport", flow.SPort);
+
+                cv.put("daddr", flow.DAddr);
+                if (flow.DPort < 0)
+                    cv.putNull("dport");
+                else
+                    cv.put("dport", flow.DPort);
+
+                cv.put("sent",flow.Sent);
+                cv.put("received",flow.Received);
+
+                cv.put("sentPackets",flow.SentPackets);
+                cv.put("receivedPackets",flow.ReceivedPackets);
+
+                if(flow.Protocol == 6){
+                    cv.put("tcpFlags", flow.TcpFlags);
+                }else{
+                    cv.putNull("tcpFlags");
+                }
+
+                cv.put("ToS", flow.Tos);
+
+                cv.put("NewFlow", flow.NewFlow);
+                cv.put("Finished", flow.Finished);
+
+                if (packageName==null){
+                    cv.putNull("packageName");
+                }else{
+                    cv.put("packageName",packageName);
+                }
+
+                if (db.update("flow", cv,
+                        "packageName = ? AND " +
+                                "time = ? AND " +
+                                "duration < ? AND " +
+                                "protocol = ? AND " +
+                                "saddr = ? AND " +
+                                "sport = ? AND " +
+                                "daddr = ? AND " +
+                                "dport = ? AND " +
+                                "Finished = 0",
+                        new String[]{
+                                cv.get("packageName").toString(),
+                                cv.get("time").toString(),
+                                cv.get("duration").toString(),
+                                cv.get("protocol").toString(),
+                                cv.get("saddr").toString(),
+                                cv.get("sport").toString(),
+                                cv.get("daddr").toString(),
+                                cv.get("dport").toString()
+                        }) == -1) {
+                    Log.e(TAG, "Udpate flow failed");
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
+    public void compactFlow(Flow flow, String packageName){
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                ContentValues cv = new ContentValues();
+                cv.put("time", flow.Time);
+                cv.put("duration", flow.Duration);
+
+                if (flow.Protocol < 0)
+                    cv.putNull("protocol");
+                else
+                    cv.put("protocol", flow.Protocol);
+
+                cv.put("saddr", flow.SAddr);
+                if (flow.SPort < 0)
+                    cv.putNull("sport");
+                else
+                    cv.put("sport", flow.SPort);
+
+                cv.put("daddr", flow.DAddr);
+                if (flow.DPort < 0)
+                    cv.putNull("dport");
+                else
+                    cv.put("dport", flow.DPort);
+
+                cv.put("sent",flow.Sent);
+                cv.put("received",flow.Received);
+
+                cv.put("sentPackets",flow.SentPackets);
+                cv.put("receivedPackets",flow.ReceivedPackets);
+
+                if(flow.Protocol == 6){
+                    cv.put("tcpFlags", flow.TcpFlags);
+                }else{
+                    cv.putNull("tcpFlags");
+                }
+
+                cv.put("ToS", flow.Tos);
+
+
+                if (packageName==null){
+                    cv.putNull("packageName");
+                }else{
+                    cv.put("packageName",packageName);
+                }
+
+                String whereClause =
+                        "packageName = ? AND " +
+                        "time = ? AND " +
+                        "duration < ? AND " +
+                        "protocol = ? AND " +
+                        "saddr = ? AND " +
+                        "sport = ? AND " +
+                        "daddr = ? AND " +
+                        "dport = ? AND " +
+                        "Finished = 0";
+                String[] whereArgs = new String[]{
+                        cv.getAsString("packageName"),
+                        cv.getAsString("time"),
+                        cv.getAsString("duration"),
+                        cv.getAsString("protocol"),
+                        cv.getAsString("saddr"),
+                        cv.getAsString("sport"),
+                        cv.getAsString("daddr"),
+                        cv.getAsString("dport")
+                };
+                Cursor cursor = db.rawQuery(
+                        "SELECT ID, NewFlow, Finished FROM flow WHERE "+whereClause, whereArgs);
+                if (cursor.getCount() == 0){
+                    cv.put("NewFlow", flow.NewFlow);
+                    cv.put("Finished", flow.Finished);
+                    if(db.insert("flow",null,cv)==-1){
+                        Log.e(TAG, "Insert flow failed");
+                    }
+                }else{
+                    cursor.moveToFirst();
+                    cv.put("NewFlow", cursor.getInt(cursor.getColumnIndex("NewFlow")) | (flow.NewFlow?1:0));
+                    cv.put("Finished", cursor.getInt(cursor.getColumnIndex("Finished")) | (flow.Finished?1:0));
+                    if(db.update("flow",cv,"ID=?",
+                            new String[]{cursor.getString(cursor.getColumnIndex("ID"))}) == -1){
+                        Log.e(TAG, "Udpate flow failed");
+                    }
+                }
+                cursor.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();

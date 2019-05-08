@@ -71,6 +71,8 @@
 #define SOCKS5_CONNECT 4
 #define SOCKS5_CONNECTED 5
 
+#define ACTIVE_FLOW_LIFETIME 20000 // milliseconds
+
 struct context {
     pthread_mutex_t lock;
     int pipefds[2];
@@ -128,11 +130,13 @@ struct icmp_session {
 #define UDP_BLOCKED 3
 
 struct udp_session {
-    time_t start_time;
+    uint64_t start_time;
     time_t time;
     jint uid;
     int version;
     uint16_t mss;
+
+    uint8_t times_measured;
 
     int8_t src_tos;
 
@@ -168,6 +172,8 @@ struct tcp_session {
     uint32_t recv_window; // host notation, scaled
     uint32_t send_window; // host notation, scaled
     uint16_t unconfirmed; // packets
+
+    uint8_t times_measured;
 
     int8_t src_tos;
 
@@ -559,7 +565,7 @@ void account_usage(const struct arguments *args, jint version, jint protocol,
 void capture_flow(const struct arguments *args, jint protocol, jlong start_time, jlong end_time,
                   const char *saddr, jint sport, const char *daddr, jint dport, jint uid, jint tos,
                   jlong sent, jlong received, jint sentpackets, jint receivedpackets,
-                  jint tcp_flags);
+                  jint tcp_flags, jboolean new_flow, jboolean finished);
 void write_pcap_hdr();
 
 void write_pcap_rec(const uint8_t *buffer, size_t len);

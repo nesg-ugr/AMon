@@ -118,6 +118,8 @@ public class DbDumper {
             ));
         }
 
+        cursor.close();
+
         flowDump = new FlowDump(Util.getMacAddress().replace(":",""), gFlows);
 
         //Log.d(TAG, flowDump.toString());
@@ -138,7 +140,7 @@ public class DbDumper {
                         if(response.isSuccessful()){
                             Log.i(TAG, "Successful flows POST");
                             // Remove only ended flows
-                            dh.cleanupEndedFlow(now);
+                            //dh.cleanupEndedFlow(now);
                         }else{
                             Log.w(TAG, "Failed to POST flows");
                         }

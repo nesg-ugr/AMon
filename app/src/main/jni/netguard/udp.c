@@ -44,6 +44,8 @@ int check_udp_session(const struct arguments *args, struct ng_session *s,
         inet_ntop(AF_INET6, &s->udp.daddr.ip6, dest, sizeof(dest));
     }
 
+
+
     // Check session timeout
     int timeout = get_udp_timeout(&s->udp, sessions, maxsessions);
     if (s->udp.state == UDP_ACTIVE && s->udp.time + timeout < now) {
@@ -72,11 +74,21 @@ int check_udp_session(const struct arguments *args, struct ng_session *s,
                       dest, ntohs(s->udp.dest), s->udp.uid, s->udp.sent, s->udp.received);
         capture_flow(args, IPPROTO_UDP, s->udp.start_time, get_ms_epoch(), source, ntohs(s->udp.source),
                      dest, ntohs(s->udp.dest), s->udp.uid, s->udp.src_tos,
-                     s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets, 0);
+                     s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets, 0,
+                     !s->udp.times_measured, JNI_TRUE);
         s->udp.sent = 0;
         s->udp.received = 0;
         s->udp.sent_packets = 0;
         s->udp.received_packets = 0;
+    } else if (s->udp.state != UDP_CLOSED && (get_ms_epoch() - s->udp.start_time)/ACTIVE_FLOW_LIFETIME > s->udp.times_measured){
+        log_android(ANDROID_LOG_INFO, "UDP Netflow capture parsed %d times %d sec state %d from %s/%u to %s/%u",
+                    s->udp.times_measured, now - s->udp.time, s->udp.state,
+                    source, ntohs(s->udp.source), dest, ntohs(s->udp.dest));
+        capture_flow(args, IPPROTO_UDP, s->udp.start_time, get_ms_epoch(), source, ntohs(s->udp.source),
+                     dest, ntohs(s->udp.dest), s->udp.uid, s->udp.src_tos,
+                     s->udp.sent, s->udp.received, s->udp.sent_packets, s->udp.received_packets, 0,
+                     !s->udp.times_measured, JNI_FALSE);
+        s->udp.times_measured++;
     }
 
     // Cleanup lingering sessions
@@ -280,6 +292,7 @@ jboolean handle_udp(const struct arguments *args,
         s->udp.time = time(NULL);
         s->udp.uid = uid;
         s->udp.version = version;
+        s->udp.times_measured = 0;
 
         int rversion;
         if (redirect == NULL)

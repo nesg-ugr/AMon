@@ -19,6 +19,8 @@ public class Flow {
     public int ReceivedPackets;
     public int TcpFlags;
     public int Tos;
+    public boolean NewFlow;
+    public boolean Finished;
 
     private static DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
 
@@ -33,6 +35,8 @@ public class Flow {
                 " Bytes " + " out " + Sent + " in " + Received +
                 " Packets " + " out " + SentPackets + " in " + ReceivedPackets +
                 " Flags " + TcpFlags +
-                " ToS " + Tos;
+                " ToS " + Tos +
+                " NewFlow " + NewFlow +
+                " Finished " + Finished;
     }
 }
