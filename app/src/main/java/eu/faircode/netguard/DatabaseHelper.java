@@ -1433,6 +1433,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         notifyLogChanged();
     }
 
+    // Compact all data flows and allow compatibility with full deletion and only finished one.
     public void compactFlow(Flow flow, String packageName){
 
         lock.writeLock().lock();
@@ -1557,10 +1558,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // WIP
-    public void cleanupEndedFlow(long time) {
-        // TODO: Add boolean check to the where statement. Only delete ended flows.
-        //  Adjust server side to handle boolean insertion and update.
+
+    public void cleanupFinishedFlow(long time) {
         /*if (!DatabaseHelper.enableTableLog){
             Log.e(TAG, "Flow table is not created.");
             return;
@@ -1572,8 +1571,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.beginTransactionNonExclusive();
             try {
                 // There an index on time
-                int rows = db.delete("flow", "time < ?", new String[]{Long.toString(time)});
-                Log.i(TAG, "Cleanup flow" +
+                int rows = db.delete("flow", "time < ? AND Finished = 1", new String[]{Long.toString(time)});
+                Log.i(TAG, "Cleanup finished flow" +
                         " before=" + SimpleDateFormat.getDateTimeInstance().format(new Date(time)) +
                         " rows=" + rows);
 

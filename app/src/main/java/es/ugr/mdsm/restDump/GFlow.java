@@ -47,6 +47,12 @@ public class GFlow {
     @SerializedName("ToS")
     @Expose
     private Integer toS;
+    @SerializedName("newFlow")
+    @Expose
+    private Boolean newFlow;
+    @SerializedName("finished")
+    @Expose
+    private Boolean finished;
 
     /**
      * No args constructor for use in serialization
@@ -57,22 +63,24 @@ public class GFlow {
 
     /**
      *
-     * @param saddr
-     * @param protocol
      * @param packageName
-     * @param dport
-     * @param sport
-     * @param daddr
      * @param time
      * @param duration
+     * @param protocol
+     * @param saddr
+     * @param sport
+     * @param daddr
+     * @param dport
      * @param sentBytes
      * @param receivedBytes
-     * @param toS
+     * @param sentPackets
      * @param receivedPackets
      * @param tcpFlags
-     * @param sentPackets
+     * @param toS
+     * @param newFlow
+     * @param finished
      */
-    public GFlow(String packageName, Long time, Long duration, Integer protocol, String saddr, Integer sport, String daddr, Integer dport, Long sentBytes, Long receivedBytes, Integer sentPackets, Integer receivedPackets, Integer tcpFlags, Integer toS) {
+    public GFlow(String packageName, Long time, Long duration, Integer protocol, String saddr, Integer sport, String daddr, Integer dport, Long sentBytes, Long receivedBytes, Integer sentPackets, Integer receivedPackets, Integer tcpFlags, Integer toS, Boolean newFlow, Boolean finished) {
         super();
         this.packageName = packageName;
         this.time = time;
@@ -88,6 +96,8 @@ public class GFlow {
         this.receivedPackets = receivedPackets;
         this.tcpFlags = tcpFlags;
         this.toS = toS;
+        this.newFlow = newFlow;
+        this.finished = finished;
     }
 
     public String getPackageName() {
@@ -202,6 +212,22 @@ public class GFlow {
         this.toS = toS;
     }
 
+    public Boolean getNewFlow() {
+        return newFlow;
+    }
+
+    public void setNewFlow(Boolean newFlow) {
+        this.newFlow = newFlow;
+    }
+
+    public Boolean getFinished() {
+        return finished;
+    }
+
+    public void setFinished(Boolean finished) {
+        this.finished = finished;
+    }
+
     @Override
     public String toString() {
         return "GFlow{" +
@@ -219,6 +245,8 @@ public class GFlow {
                 ", receivedPackets=" + receivedPackets +
                 ", tcpFlags=" + tcpFlags +
                 ", toS=" + toS +
+                ", newFlow=" + newFlow +
+                ", finished=" + finished +
                 '}';
     }
 }

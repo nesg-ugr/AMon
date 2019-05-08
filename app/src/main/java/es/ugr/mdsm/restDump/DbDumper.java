@@ -25,7 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DbDumper {
     private static final String TAG = "MDSM.DbDumper";
-    //private static final String ENDPOINT = "https://mdsm1.ugr.es/";
+    private static final int MINIMAL_AMOUNT_FLOWS = 10;
 
     private long mInterval;   // in ms
     private Context mContext;
@@ -86,43 +86,46 @@ public class DbDumper {
     }
 
     private void dataDump(){
+        // TODO: Add minimal amount of data to update
         final long now = Calendar.getInstance().getTimeInMillis();
         List<GFlow> gFlows = new ArrayList<>();
         FlowDump flowDump;
         Gson gson = new Gson();
 
         // Read flows since now
-        Cursor cursor = dh.getFlow(now);
-
-        if(cursor.getCount() <= 0){
-            Log.d(TAG, "There's no flow entry to send");
-            return;
+        try (Cursor cursor = dh.getFlow(now)){
+            if(cursor.getCount() <= 0){
+                Log.d(TAG, "There's no flow entry to send");
+                return;
+            }else if(cursor.getCount() <= MINIMAL_AMOUNT_FLOWS){
+                Log.d(TAG, "Not enough flows");
+                return;
+            }else{
+                while (cursor.moveToNext()){
+                    gFlows.add(new GFlow(
+                            cursor.getString(cursor.getColumnIndex("packageName")),
+                            cursor.getLong(cursor.getColumnIndex("time")),
+                            cursor.getLong(cursor.getColumnIndex("duration")),
+                            cursor.getInt(cursor.getColumnIndex("protocol")),
+                            cursor.getString(cursor.getColumnIndex("saddr")),
+                            cursor.getInt(cursor.getColumnIndex("sport")),
+                            cursor.getString(cursor.getColumnIndex("daddr")),
+                            cursor.getInt(cursor.getColumnIndex("dport")),
+                            cursor.getLong(cursor.getColumnIndex("sent")),
+                            cursor.getLong(cursor.getColumnIndex("received")),
+                            cursor.getInt(cursor.getColumnIndex("sentPackets")),
+                            cursor.getInt(cursor.getColumnIndex("receivedPackets")),
+                            cursor.getInt(cursor.getColumnIndex("tcpFlags")),
+                            cursor.getInt(cursor.getColumnIndex("ToS")),
+                            cursor.getInt(cursor.getColumnIndex("NewFlow"))!=0,
+                            cursor.getInt(cursor.getColumnIndex("Finished"))!=0
+                            ));
+                }
+            }
         }
-
-        while (cursor.moveToNext()){
-            gFlows.add(new GFlow(
-                    cursor.getString(cursor.getColumnIndex("packageName")),
-                    cursor.getLong(cursor.getColumnIndex("time")),
-                    cursor.getLong(cursor.getColumnIndex("duration")),
-                    cursor.getInt(cursor.getColumnIndex("protocol")),
-                    cursor.getString(cursor.getColumnIndex("saddr")),
-                    cursor.getInt(cursor.getColumnIndex("sport")),
-                    cursor.getString(cursor.getColumnIndex("daddr")),
-                    cursor.getInt(cursor.getColumnIndex("dport")),
-                    cursor.getLong(cursor.getColumnIndex("sent")),
-                    cursor.getLong(cursor.getColumnIndex("received")),
-                    cursor.getInt(cursor.getColumnIndex("sentPackets")),
-                    cursor.getInt(cursor.getColumnIndex("receivedPackets")),
-                    cursor.getInt(cursor.getColumnIndex("tcpFlags")),
-                    cursor.getInt(cursor.getColumnIndex("ToS"))
-            ));
-        }
-
-        cursor.close();
 
         flowDump = new FlowDump(Util.getMacAddress().replace(":",""), gFlows);
 
-        //Log.d(TAG, flowDump.toString());
         Log.d(TAG, gson.toJson(flowDump));
 
         // Post data
@@ -139,8 +142,8 @@ public class DbDumper {
                     public void onNext(Response response) {
                         if(response.isSuccessful()){
                             Log.i(TAG, "Successful flows POST");
-                            // Remove only ended flows
-                            //dh.cleanupEndedFlow(now);
+                            // Remove only finished flows
+                            dh.cleanupFinishedFlow(now);
                         }else{
                             Log.w(TAG, "Failed to POST flows");
                         }
