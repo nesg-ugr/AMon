@@ -156,6 +156,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createTableForward(db);
         createTableApp(db);         // Populated en Rule.187
         createTableFlow(db);
+        addTriggers(db);
     }
 
     @Override
@@ -271,7 +272,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ", ToS INTEGER " +
                 ", NewFlow INTEGER " +
                 ", Finished INTEGER " +
+                ", last_modified DEFAULT CURRENT_TIMESTAMP" +
                 ");");
+    }
+
+    private void addTriggers(SQLiteDatabase db) {
+        Log.i(TAG, "Adding triggers");
+        db.execSQL("CREATE TRIGGER last_modified_trigger"+
+                " AFTER UPDATE ON flow FOR EACH ROW" +
+                " BEGIN" +
+                " UPDATE flow SET last_modified = CAST((strftime('%s','now')- strftime('%S','now')+ strftime('%f','now'))*1000 AS INTEGER);" +
+                " END");
     }
 
     private boolean columnExists(SQLiteDatabase db, String table, String column) {
@@ -1558,6 +1569,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // Take into account the last_modified column to don't delete entries that could be changed in
+    // a non-ACID request
+    public void safeCleanupFlow(long time) {
+        /*if (!DatabaseHelper.enableTableLog){
+            Log.e(TAG, "Flow table is not created.");
+            return;
+        }*/
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                // There an index on time
+                int rows = db.delete("flow", "time < ? AND last_modified < ?", new String[]{Long.toString(time), Long.toString(time)});
+                Log.i(TAG, "Safe Cleanup flow" +
+                        " before=" + SimpleDateFormat.getDateTimeInstance().format(new Date(time)) +
+                        " rows=" + rows);
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
 
     public void cleanupFinishedFlow(long time) {
         /*if (!DatabaseHelper.enableTableLog){

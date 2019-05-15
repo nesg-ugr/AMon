@@ -86,7 +86,6 @@ public class DbDumper {
     }
 
     private void dataDump(){
-        // TODO: Add minimal amount of data to update
         final long now = Calendar.getInstance().getTimeInMillis();
         List<GFlow> gFlows = new ArrayList<>();
         FlowDump flowDump;
@@ -142,8 +141,10 @@ public class DbDumper {
                     public void onNext(Response response) {
                         if(response.isSuccessful()){
                             Log.i(TAG, "Successful flows POST");
+                            // Remove everything
+                            dh.safeCleanupFlow(now);
                             // Remove only finished flows
-                            dh.cleanupFinishedFlow(now);
+                            // dh.cleanupFinishedFlow(now);
                         }else{
                             Log.w(TAG, "Failed to POST flows");
                         }
