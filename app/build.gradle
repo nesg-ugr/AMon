@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "eu.faircode.netguard"
         versionName = "2.228"
-        minSdkVersion 22
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode = 1
         archivesBaseName = "NetGuard-v$versionName"
@@ -95,5 +95,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
+    implementation 'com.scottyab:rootbeer-lib:0.0.7'
 
 }

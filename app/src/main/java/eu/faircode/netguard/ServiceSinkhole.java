@@ -113,6 +113,8 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import es.ugr.mdsm.deviceInfo.Networking;
+
 public class ServiceSinkhole extends VpnService implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "NetGuard.Service";
 
@@ -784,6 +786,13 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         } catch (PackageManager.NameNotFoundException ignored) {
                         }
                     }
+                    String address = Networking.getNetworkAddress(ServiceSinkhole.this);
+                    if(address != null){
+                        flow.SAddr = address;
+                        Log.d(TAG, "Source address changed to: "+ address);
+                    }
+
+
                     DatabaseHelper dh = DatabaseHelper.getInstance(ServiceSinkhole.this);
                     Log.i(TAG, "Collected flow " + flow);
                     /*if(flow.NewFlow){

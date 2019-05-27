@@ -24,8 +24,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.AsyncTask;
@@ -33,26 +31,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ImageSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,20 +50,17 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import es.ugr.mdsm.deviceInfo.CallReceiver;
+import es.ugr.mdsm.deviceInfo.PremiumTelephonyChecker;
+import es.ugr.mdsm.deviceInfo.Probes;
+import es.ugr.mdsm.deviceInfo.Software;
 import es.ugr.mdsm.restDump.DbDumper;
 
 public class ActivityMain extends AppCompatActivity {
@@ -162,6 +145,8 @@ public class ActivityMain extends AppCompatActivity {
         dbDumper.dumpDeviceInfo();
         dbDumper.start();
 
+        new PremiumTelephonyChecker(this);
+
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);
         swEnabled.setChecked(enabled);
@@ -171,7 +156,6 @@ public class ActivityMain extends AppCompatActivity {
                 activateVpn(isChecked);
             }
         });
-
 
         if (!getIntent().hasExtra(EXTRA_APPROVE)) {
             if (enabled)
