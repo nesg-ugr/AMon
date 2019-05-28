@@ -3,7 +3,7 @@ package es.ugr.mdsm.restDump;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class GFlow {
+public class Flow {
 
     @SerializedName("packageName")
     @Expose
@@ -58,7 +58,7 @@ public class GFlow {
      * No args constructor for use in serialization
      *
      */
-    public GFlow() {
+    public Flow() {
     }
 
     /**
@@ -80,7 +80,7 @@ public class GFlow {
      * @param newFlow
      * @param finished
      */
-    public GFlow(String packageName, Long time, Long duration, Integer protocol, String saddr, Integer sport, String daddr, Integer dport, Long sentBytes, Long receivedBytes, Integer sentPackets, Integer receivedPackets, Integer tcpFlags, Integer toS, Boolean newFlow, Boolean finished) {
+    public Flow(String packageName, Long time, Long duration, Integer protocol, String saddr, Integer sport, String daddr, Integer dport, Long sentBytes, Long receivedBytes, Integer sentPackets, Integer receivedPackets, Integer tcpFlags, Integer toS, Boolean newFlow, Boolean finished) {
         super();
         this.packageName = packageName;
         this.time = time;
@@ -230,7 +230,7 @@ public class GFlow {
 
     @Override
     public String toString() {
-        return "GFlow{" +
+        return "Flow{" +
                 "packageName='" + packageName + '\'' +
                 ", time=" + time +
                 ", duration=" + duration +

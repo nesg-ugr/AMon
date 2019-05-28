@@ -1,5 +1,4 @@
 package es.ugr.mdsm.restDump;
-import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -9,19 +8,36 @@ public class Device {
     @SerializedName("mac")
     @Expose
     private String mac;
-    @SerializedName("sdk")
+    @SerializedName("build")
     @Expose
-    private Integer sdk;
+    private Build build;
+    @SerializedName("specification")
+    @Expose
+    private Specification specification;
+    @SerializedName("timestamp")
+    @Expose
+    private String timestamp;
+
+    /**
+     * No args constructor for use in serialization
+     *
+     */
+    public Device() {
+    }
 
     /**
      *
-     * @param mac MAC address of the device
-     * @param sdk SDK of the Android Build
+     * @param timestamp
+     * @param specification
+     * @param mac
+     * @param build
      */
-    Device(String mac, Integer sdk) {
+    public Device(String mac, Build build, Specification specification, String timestamp) {
         super();
         this.mac = mac;
-        this.sdk = sdk;
+        this.build = build;
+        this.specification = specification;
+        this.timestamp = timestamp;
     }
 
     public String getMac() {
@@ -32,19 +48,37 @@ public class Device {
         this.mac = mac;
     }
 
-    public Integer getSdk() {
-        return sdk;
+    public Build getBuild() {
+        return build;
     }
 
-    public void setSdk(Integer sdk) {
-        this.sdk = sdk;
+    public void setBuild(Build build) {
+        this.build = build;
+    }
+
+    public Specification getSpecification() {
+        return specification;
+    }
+
+    public void setSpecification(Specification specification) {
+        this.specification = specification;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
     public String toString() {
         return "Device{" +
                 "mac='" + mac + '\'' +
-                ", sdk=" + sdk +
+                ", build=" + build +
+                ", specification=" + specification +
+                ", timestamp='" + timestamp + '\'' +
                 '}';
     }
 }

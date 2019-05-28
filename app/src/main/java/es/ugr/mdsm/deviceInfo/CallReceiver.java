@@ -25,6 +25,7 @@ public class CallReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        // TODO: Doesn't work as intended
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
         if (Intent.ACTION_NEW_OUTGOING_CALL.equals(intent.getAction())) {
             savedNumber = intent.getExtras().getString(Intent.EXTRA_PHONE_NUMBER);

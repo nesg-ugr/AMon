@@ -87,7 +87,7 @@ public class DbDumper {
 
     private void dataDump(){
         final long now = Calendar.getInstance().getTimeInMillis();
-        List<GFlow> gFlows = new ArrayList<>();
+        List<Flow> flows = new ArrayList<>();
         FlowDump flowDump;
         Gson gson = new Gson();
 
@@ -101,7 +101,7 @@ public class DbDumper {
                 return;
             }else{
                 while (cursor.moveToNext()){
-                    gFlows.add(new GFlow(
+                    flows.add(new Flow(
                             cursor.getString(cursor.getColumnIndex("packageName")),
                             cursor.getLong(cursor.getColumnIndex("time")),
                             cursor.getLong(cursor.getColumnIndex("duration")),
@@ -123,7 +123,7 @@ public class DbDumper {
             }
         }
 
-        flowDump = new FlowDump(Util.getMacAddress().replace(":",""), gFlows);
+        flowDump = new FlowDump(Util.getMacAddress().replace(":",""), flows);
 
         Log.d(TAG, gson.toJson(flowDump));
 
@@ -165,7 +165,8 @@ public class DbDumper {
     }
 
     private void deviceDump(){
-
+        /*
+        // TODO: Need to be updated
         // Create Gson object
         Device device = new Device(
                 Util.getMacAddress().replace(":",""),
@@ -202,6 +203,7 @@ public class DbDumper {
 
                     }
                 });
+        */
     }
 
 

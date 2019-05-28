@@ -10,7 +10,7 @@ public class FlowDump {
     private String mac;
     @SerializedName("flows")
     @Expose
-    private List<GFlow> flows = null;
+    private List<Flow> flows = null;
 
     /**
      * No args constructor for use in serialization
@@ -24,7 +24,7 @@ public class FlowDump {
      * @param mac
      * @param flows
      */
-    public FlowDump(String mac, List<GFlow> flows) {
+    public FlowDump(String mac, List<Flow> flows) {
         super();
         this.mac = mac;
         this.flows = flows;
@@ -38,11 +38,11 @@ public class FlowDump {
         this.mac = mac;
     }
 
-    public List<GFlow> getFlows() {
+    public List<Flow> getFlows() {
         return flows;
     }
 
-    public void setFlows(List<GFlow> flows) {
+    public void setFlows(List<Flow> flows) {
         this.flows = flows;
     }
 

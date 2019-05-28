@@ -48,6 +48,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.BitSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -146,6 +147,9 @@ public class ActivityMain extends AppCompatActivity {
         dbDumper.start();
 
         new PremiumTelephonyChecker(this);
+
+        BitSet bitSet = Software.permissionsAsBitArray(Software.permissionsByApp(this, Software.getInstalledApplication(this).get(51)));
+        es.ugr.mdsm.restDump.Util.bitSetToInteger(bitSet);
 
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);
