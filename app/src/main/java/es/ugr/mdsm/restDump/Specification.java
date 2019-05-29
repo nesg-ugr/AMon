@@ -10,7 +10,7 @@ public class Specification {
     private Integer cpuCores;
     @SerializedName("ramTotal")
     @Expose
-    private Integer ramTotal;
+    private Long ramTotal;
     @SerializedName("batteryTotal")
     @Expose
     private Integer batteryTotal;
@@ -28,7 +28,7 @@ public class Specification {
      * @param ramTotal
      * @param batteryTotal
      */
-    public Specification(Integer cpuCores, Integer ramTotal, Integer batteryTotal) {
+    public Specification(Integer cpuCores, Long ramTotal, Integer batteryTotal) {
         super();
         this.cpuCores = cpuCores;
         this.ramTotal = ramTotal;
@@ -43,11 +43,11 @@ public class Specification {
         this.cpuCores = cpuCores;
     }
 
-    public Integer getRamTotal() {
+    public Long getRamTotal() {
         return ramTotal;
     }
 
-    public void setRamTotal(Integer ramTotal) {
+    public void setRamTotal(Long ramTotal) {
         this.ramTotal = ramTotal;
     }
 

@@ -14,9 +14,12 @@ public class Sensor {
     @SerializedName("security")
     @Expose
     private Security security;
+    @SerializedName("mac")
+    @Expose
+    private String mac;
     @SerializedName("timestamp")
     @Expose
-    private String timestamp;
+    private Long timestamp;
 
     /**
      * No args constructor for use in serialization
@@ -27,16 +30,18 @@ public class Sensor {
 
     /**
      *
+     * @param mac
      * @param timestamp
      * @param connectivity
      * @param security
      * @param stat
      */
-    public Sensor(Connectivity connectivity, Stat stat, Security security, String timestamp) {
+    public Sensor(Connectivity connectivity, Stat stat, Security security, String mac, Long timestamp) {
         super();
         this.connectivity = connectivity;
         this.stat = stat;
         this.security = security;
+        this.mac = mac;
         this.timestamp = timestamp;
     }
 
@@ -64,11 +69,19 @@ public class Sensor {
         this.security = security;
     }
 
-    public String getTimestamp() {
+    public String getMac() {
+        return mac;
+    }
+
+    public void setMac(String mac) {
+        this.mac = mac;
+    }
+
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -78,6 +91,7 @@ public class Sensor {
                 "connectivity=" + connectivity +
                 ", stat=" + stat +
                 ", security=" + security +
+                ", mac='" + mac + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 '}';
     }

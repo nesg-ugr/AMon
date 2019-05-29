@@ -7,13 +7,13 @@ public class Stat {
 
     @SerializedName("cpuUsage")
     @Expose
-    private Double cpuUsage;
+    private Float cpuUsage;
     @SerializedName("ramUsage")
     @Expose
-    private Double ramUsage;
+    private Long ramUsage;
     @SerializedName("batteryLevel")
     @Expose
-    private Double batteryLevel;
+    private Integer batteryLevel;
 
     /**
      * No args constructor for use in serialization
@@ -28,34 +28,34 @@ public class Stat {
      * @param batteryLevel
      * @param cpuUsage
      */
-    public Stat(Double cpuUsage, Double ramUsage, Double batteryLevel) {
+    public Stat(Float cpuUsage, Long ramUsage, Integer batteryLevel) {
         super();
         this.cpuUsage = cpuUsage;
         this.ramUsage = ramUsage;
         this.batteryLevel = batteryLevel;
     }
 
-    public Double getCpuUsage() {
+    public Float getCpuUsage() {
         return cpuUsage;
     }
 
-    public void setCpuUsage(Double cpuUsage) {
+    public void setCpuUsage(Float cpuUsage) {
         this.cpuUsage = cpuUsage;
     }
 
-    public Double getRamUsage() {
+    public Long getRamUsage() {
         return ramUsage;
     }
 
-    public void setRamUsage(Double ramUsage) {
+    public void setRamUsage(Long ramUsage) {
         this.ramUsage = ramUsage;
     }
 
-    public Double getBatteryLevel() {
+    public Integer getBatteryLevel() {
         return batteryLevel;
     }
 
-    public void setBatteryLevel(Double batteryLevel) {
+    public void setBatteryLevel(Integer batteryLevel) {
         this.batteryLevel = batteryLevel;
     }
 

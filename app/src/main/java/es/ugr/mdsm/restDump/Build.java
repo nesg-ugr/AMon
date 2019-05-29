@@ -20,9 +20,6 @@ public class Build {
     @SerializedName("hardware")
     @Expose
     private String hardware;
-    @SerializedName("serial")
-    @Expose
-    private String serial;
     @SerializedName("bootloader")
     @Expose
     private String bootloader;
@@ -32,7 +29,7 @@ public class Build {
     @SerializedName("host")
     @Expose
     private String host;
-    @SerializedName("sdk_int")
+    @SerializedName("sdk")
     @Expose
     private Integer sdkInt;
     @SerializedName("id")
@@ -40,7 +37,7 @@ public class Build {
     private String id;
     @SerializedName("time")
     @Expose
-    private Integer time;
+    private Long time;
     @SerializedName("fingerprint")
     @Expose
     private String fingerprint;
@@ -50,6 +47,7 @@ public class Build {
      *
      */
     public Build() {
+
     }
 
     /**
@@ -66,16 +64,14 @@ public class Build {
      * @param bootloader
      * @param board
      * @param user
-     * @param serial
      */
-    public Build(String manufacturer, String brand, String model, String board, String hardware, String serial, String bootloader, String user, String host, Integer sdkInt, String id, Integer time, String fingerprint) {
+    public Build(String manufacturer, String brand, String model, String board, String hardware, String bootloader, String user, String host, Integer sdkInt, String id, Long time, String fingerprint) {
         super();
         this.manufacturer = manufacturer;
         this.brand = brand;
         this.model = model;
         this.board = board;
         this.hardware = hardware;
-        this.serial = serial;
         this.bootloader = bootloader;
         this.user = user;
         this.host = host;
@@ -125,14 +121,6 @@ public class Build {
         this.hardware = hardware;
     }
 
-    public String getSerial() {
-        return serial;
-    }
-
-    public void setSerial(String serial) {
-        this.serial = serial;
-    }
-
     public String getBootloader() {
         return bootloader;
     }
@@ -173,11 +161,11 @@ public class Build {
         this.id = id;
     }
 
-    public Integer getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(Integer time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 
@@ -197,7 +185,6 @@ public class Build {
                 ", model='" + model + '\'' +
                 ", board='" + board + '\'' +
                 ", hardware='" + hardware + '\'' +
-                ", serial='" + serial + '\'' +
                 ", bootloader='" + bootloader + '\'' +
                 ", user='" + user + '\'' +
                 ", host='" + host + '\'' +

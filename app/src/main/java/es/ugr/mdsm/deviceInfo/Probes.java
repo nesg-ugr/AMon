@@ -49,6 +49,11 @@ public class Probes {
         activityManager.getMemoryInfo(memoryInfo);
         return memoryInfo.totalMem;
     }
+    public static int numCpuCores() {
+
+        return Runtime.getRuntime().availableProcessors();
+
+    }
 
     // https://stackoverflow.com/a/25717220
     public static float cpuUsageByCore(int i) {
@@ -132,7 +137,7 @@ public class Probes {
         return 0;
     }
 
-    public static float getCpuUsage(){
+    public static float cpuUsage(){
         return cpuUsageByCore(-1);
     }
 
@@ -140,7 +145,7 @@ public class Probes {
         return ((WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE)).isWifiEnabled();
     }
 
-    public static boolean isBlutoothEnabled() {
+    public static boolean isBluetoothEnabled() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         return bluetoothAdapter != null && bluetoothAdapter.isEnabled();
     }

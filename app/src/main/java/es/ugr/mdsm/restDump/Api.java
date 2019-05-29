@@ -12,4 +12,11 @@ public interface Api {
 
     @POST("flow")
     Observable<Response<Void>> postFlows(@Body FlowDump flowDump);
+
+    @POST("app")
+    Observable<Response<Void>> postApp(@Body App app);
+
+    @POST("sensor")
+    Observable<Response<Void>> postSensor(@Body Sensor sensor);
+
 }

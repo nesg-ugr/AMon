@@ -24,14 +24,28 @@ public class Software {
     private final static String TAG = "DeviceInfo.Software";
     private final static int TOTAL_NUMBER_OF_PERMISSIONS = 156;
 
-    public static String[] permissionsByApp(Context context, ApplicationInfo applicationInfo){
+    public static String[] permissionsOfApp(Context context, ApplicationInfo applicationInfo){
         PackageManager pm = context.getPackageManager();
+        String[] permissions = {};
         try {
             PackageInfo packageInfo = pm.getPackageInfo(applicationInfo.packageName, PackageManager.GET_PERMISSIONS);
-            return packageInfo.requestedPermissions;    // could be null
+            if(packageInfo.requestedPermissions != null){
+                permissions = packageInfo.requestedPermissions;
+            }
+            return permissions;    // could be null
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Name not found for application:" + applicationInfo,e);
-            return null;
+            return permissions;
+        }
+    }
+
+    public static String versionOfApp(Context context, ApplicationInfo applicationInfo){
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(applicationInfo.packageName,0);
+            return packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Name not found for application:" + applicationInfo,e);
+            return "unavailable";
         }
     }
 
@@ -42,7 +56,6 @@ public class Software {
 
     public static BitSet permissionsAsBitArray(String[] permissions){
         BitSet bitSet = new BitSet(TOTAL_NUMBER_OF_PERMISSIONS);
-        // TODO: parse permissions to the bit array
         String trimmedPermission;
         String[] splitArray;
         Map<String, Boolean> map = initialPermissionsMap();
@@ -228,7 +241,7 @@ public class Software {
 
     // Can't assure that the application is autostarted, just that the app have the autostart permission
     public static boolean isAutoStarted(Context context, ApplicationInfo applicationInfo){
-        String[] permissions = permissionsByApp(context, applicationInfo);
+        String[] permissions = permissionsOfApp(context, applicationInfo);
         return permissions != null && Arrays.asList(permissions).contains(Manifest.permission.RECEIVE_BOOT_COMPLETED);
     }
 

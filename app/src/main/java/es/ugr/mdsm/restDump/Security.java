@@ -14,9 +14,9 @@ public class Security {
     @SerializedName("secure")
     @Expose
     private Boolean secure;
-    @SerializedName("root")
+    @SerializedName("rooted")
     @Expose
-    private Boolean root;
+    private Boolean rooted;
 
     /**
      * No args constructor for use in serialization
@@ -28,16 +28,16 @@ public class Security {
     /**
      *
      * @param developerOptions
-     * @param root
+     * @param rooted
      * @param secure
      * @param unknownSources
      */
-    public Security(Boolean unknownSources, Boolean developerOptions, Boolean secure, Boolean root) {
+    public Security(Boolean unknownSources, Boolean developerOptions, Boolean secure, Boolean rooted) {
         super();
         this.unknownSources = unknownSources;
         this.developerOptions = developerOptions;
         this.secure = secure;
-        this.root = root;
+        this.rooted = rooted;
     }
 
     public Boolean getUnknownSources() {
@@ -64,12 +64,12 @@ public class Security {
         this.secure = secure;
     }
 
-    public Boolean getRoot() {
-        return root;
+    public Boolean getRooted() {
+        return rooted;
     }
 
-    public void setRoot(Boolean root) {
-        this.root = root;
+    public void setRooted(Boolean rooted) {
+        this.rooted = rooted;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class Security {
                 "unknownSources=" + unknownSources +
                 ", developerOptions=" + developerOptions +
                 ", secure=" + secure +
-                ", root=" + root +
+                ", rooted=" + rooted +
                 '}';
     }
 }

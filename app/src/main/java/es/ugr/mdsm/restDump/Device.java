@@ -16,7 +16,7 @@ public class Device {
     private Specification specification;
     @SerializedName("timestamp")
     @Expose
-    private String timestamp;
+    private Long timestamp;
 
     /**
      * No args constructor for use in serialization
@@ -32,7 +32,7 @@ public class Device {
      * @param mac
      * @param build
      */
-    public Device(String mac, Build build, Specification specification, String timestamp) {
+    public Device(String mac, Build build, Specification specification, Long timestamp) {
         super();
         this.mac = mac;
         this.build = build;
@@ -64,11 +64,11 @@ public class Device {
         this.specification = specification;
     }
 
-    public String getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 

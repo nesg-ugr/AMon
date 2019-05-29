@@ -2,18 +2,23 @@ package es.ugr.mdsm.restDump;
 
 
 import android.content.Context;
-import android.os.Build;
+import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.database.Cursor;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import es.ugr.mdsm.deviceInfo.Probes;
+import es.ugr.mdsm.deviceInfo.Software;
 import eu.faircode.netguard.DatabaseHelper;
-import eu.faircode.netguard.Util;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -33,6 +38,8 @@ public class DbDumper {
     private Runnable periodicUpdate;
     private Runnable asyncUpdate;
     private Runnable devicePush;
+    private Runnable appPush;
+    private Runnable sensorPush;
     private Api api;
     private DatabaseHelper dh;
 
@@ -43,20 +50,32 @@ public class DbDumper {
         periodicUpdate = new Runnable() {
             @Override
             public void run() {
-                dataDump();
+                flowDump();
                 restHandler.postDelayed(this, mInterval);
             }
         };
         asyncUpdate = new Runnable() {
             @Override
             public void run() {
-                dataDump();
+                flowDump();
             }
         };
         devicePush = new Runnable() {
             @Override
             public void run() {
                 deviceDump();
+            }
+        };
+        appPush = new Runnable() {
+            @Override
+            public void run() {
+                appDump();
+            }
+        };
+        sensorPush = new Runnable() {
+            @Override
+            public void run() {
+                sensorDump();
             }
         };
         Retrofit retrofit = new Retrofit.Builder()
@@ -80,12 +99,20 @@ public class DbDumper {
     public void dumpDeviceInfo(){
         restHandler.post(devicePush);
     }
+
+    public void dumpAppInfo(){
+        restHandler.post(appPush);
+    }
+
+    public void dumpSensorInfo(){
+        restHandler.post(sensorPush);
+    }
     public void stop(){
         restHandler.removeCallbacks(periodicUpdate);
         restHandler.removeCallbacks(asyncUpdate);
     }
 
-    private void dataDump(){
+    private void flowDump(){
         final long now = Calendar.getInstance().getTimeInMillis();
         List<Flow> flows = new ArrayList<>();
         FlowDump flowDump;
@@ -123,7 +150,7 @@ public class DbDumper {
             }
         }
 
-        flowDump = new FlowDump(Util.getMacAddress().replace(":",""), flows);
+        flowDump = new FlowDump(getFormattedMac(), flows);
 
         Log.d(TAG, gson.toJson(flowDump));
 
@@ -165,12 +192,26 @@ public class DbDumper {
     }
 
     private void deviceDump(){
-        /*
-        // TODO: Need to be updated
-        // Create Gson object
+
         Device device = new Device(
-                Util.getMacAddress().replace(":",""),
-                Build.VERSION.SDK_INT);
+                getFormattedMac(),
+                new Build(
+                        android.os.Build.MANUFACTURER,
+                        android.os.Build.BRAND,
+                        android.os.Build.MODEL,
+                        android.os.Build.BOARD,
+                        android.os.Build.HARDWARE,
+                        android.os.Build.BOOTLOADER,
+                        android.os.Build.USER,
+                        android.os.Build.HOST,
+                        android.os.Build.VERSION.SDK_INT,
+                        android.os.Build.ID,
+                        android.os.Build.TIME,
+                        android.os.Build.FINGERPRINT
+                ),
+                new Specification(Probes.numCpuCores(), Probes.ramTotal(mContext), Probes.batteryTotal(mContext)),
+                getTimeStamp()
+        );
 
         Log.d(TAG, device.toString());
 
@@ -203,7 +244,125 @@ public class DbDumper {
 
                     }
                 });
-        */
+    }
+
+    private void appDump(){
+
+        List<App_> app_list = new ArrayList<>();
+        for (ApplicationInfo applicationInfo :
+                Software.getInstalledApplication(mContext)) {
+            app_list.add(new App_(
+                    applicationInfo.packageName,
+                    Util.bitSetToInteger(Software.permissionsAsBitArray(Software.permissionsOfApp(mContext, applicationInfo))),
+                    Software.versionOfApp(mContext,applicationInfo),
+                    Software.isAutoStarted(mContext, applicationInfo)
+            ));
+        }
+        App app = new App(
+                app_list,
+                getFormattedMac(),
+                getTimeStamp()
+        );
+
+        Log.d(TAG, app.toString());
+
+        // Post app
+        api.postApp(app)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<Void>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response response) {
+                        if(response.isSuccessful()){
+                            Log.i(TAG, "Successful app push");
+                        }else{
+                            Log.w(TAG, "Failed to POST app");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG,"Error in app POST",e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    private void sensorDump(){
+
+        Sensor sensor = new Sensor(
+                new Connectivity(
+                        Probes.isMobileDataEnabled(mContext),
+                        Probes.isWifiEnabled(mContext),
+                        Probes.isAirplaneModeEnabled(mContext),
+                        Probes.isBluetoothEnabled(),
+                        Probes.isGpsEnabled(mContext)
+                ),
+                new Stat(
+                        Probes.cpuUsage(),
+                        Probes.ramUsage(mContext),
+                        Probes.batteryLevel(mContext)
+                ),
+                new Security(
+                        Software.isUnknownSourcesEnabled(mContext),
+                        Software.isDeveloperOptionsEnabled(mContext),
+                        Software.isDeviceSecure(mContext),
+                        Software.isRooted(mContext)
+                ),
+                getFormattedMac(),
+                getTimeStamp()
+        );
+
+        Log.d(TAG, sensor.toString());
+
+        // Post sensor
+        api.postSensor(sensor)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<Void>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response response) {
+                        if(response.isSuccessful()){
+                            Log.i(TAG, "Successful sensor push");
+                        }else{
+                            Log.w(TAG, "Failed to POST sensor");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG,"Error in sensor POST",e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    private Long getTimeStamp(){
+        return System.currentTimeMillis();
+    }
+
+    private String getFormattedMac(){
+        return eu.faircode.netguard.Util.getMacAddress().replace(":","");
     }
 
 

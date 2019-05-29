@@ -1,5 +1,7 @@
 package es.ugr.mdsm.restDump;
 
+import android.content.Context;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -14,6 +16,9 @@ public class Connectivity {
     @SerializedName("airplane")
     @Expose
     private Boolean airplane;
+    @SerializedName("bluetooth")
+    @Expose
+    private Boolean bluetooth;
     @SerializedName("gps")
     @Expose
     private Boolean gps;
@@ -23,6 +28,7 @@ public class Connectivity {
      *
      */
     public Connectivity() {
+
     }
 
     /**
@@ -30,13 +36,15 @@ public class Connectivity {
      * @param wifi
      * @param airplane
      * @param data
+     * @param bluetooth
      * @param gps
      */
-    public Connectivity(Boolean data, Boolean wifi, Boolean airplane, Boolean gps) {
+    public Connectivity(Boolean data, Boolean wifi, Boolean airplane, Boolean bluetooth, Boolean gps) {
         super();
         this.data = data;
         this.wifi = wifi;
         this.airplane = airplane;
+        this.bluetooth = bluetooth;
         this.gps = gps;
     }
 
@@ -64,6 +72,14 @@ public class Connectivity {
         this.airplane = airplane;
     }
 
+    public Boolean getBluetooth() {
+        return bluetooth;
+    }
+
+    public void setBluetooth(Boolean bluetooth) {
+        this.bluetooth = bluetooth;
+    }
+
     public Boolean getGps() {
         return gps;
     }
@@ -78,6 +94,7 @@ public class Connectivity {
                 "data=" + data +
                 ", wifi=" + wifi +
                 ", airplane=" + airplane +
+                ", bluetooth=" + bluetooth +
                 ", gps=" + gps +
                 '}';
     }

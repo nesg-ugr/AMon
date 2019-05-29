@@ -8,7 +8,11 @@ public class Util {
     public static BigInteger bitSetToInteger(BitSet bitSet){
         byte[] bytes = bitSet.toByteArray();
         reverseByteArray(bytes);
-        return new BigInteger(bytes);
+        if (bytes.length > 0) {
+            return new BigInteger(bytes);
+        }else{
+            return new BigInteger("0");
+        }
     }
 
     public static void reverseByteArray(byte[] bytes){

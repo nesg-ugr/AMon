@@ -58,9 +58,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import es.ugr.mdsm.deviceInfo.CallReceiver;
 import es.ugr.mdsm.deviceInfo.PremiumTelephonyChecker;
-import es.ugr.mdsm.deviceInfo.Probes;
 import es.ugr.mdsm.deviceInfo.Software;
 import es.ugr.mdsm.restDump.DbDumper;
 
@@ -144,12 +142,12 @@ public class ActivityMain extends AppCompatActivity {
 
         DbDumper dbDumper = new DbDumper(20*1000, this);
         dbDumper.dumpDeviceInfo();
+        dbDumper.dumpAppInfo();
+        dbDumper.dumpSensorInfo();
         dbDumper.start();
 
         new PremiumTelephonyChecker(this);
 
-        BitSet bitSet = Software.permissionsAsBitArray(Software.permissionsByApp(this, Software.getInstalledApplication(this).get(51)));
-        es.ugr.mdsm.restDump.Util.bitSetToInteger(bitSet);
 
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);

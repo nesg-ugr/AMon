@@ -6,12 +6,16 @@ import com.google.gson.annotations.SerializedName;
 
 public class App {
 
+
     @SerializedName("app")
     @Expose
     private List<App_> app = null;
+    @SerializedName("mac")
+    @Expose
+    private String mac;
     @SerializedName("timestamp")
     @Expose
-    private String timestamp;
+    private Long timestamp;
 
     /**
      * No args constructor for use in serialization
@@ -22,12 +26,14 @@ public class App {
 
     /**
      *
+     * @param mac
      * @param timestamp
      * @param app
      */
-    public App(List<App_> app, String timestamp) {
+    public App(List<App_> app, String mac, Long timestamp) {
         super();
         this.app = app;
+        this.mac = mac;
         this.timestamp = timestamp;
     }
 
@@ -39,11 +45,19 @@ public class App {
         this.app = app;
     }
 
-    public String getTimestamp() {
+    public String getMac() {
+        return mac;
+    }
+
+    public void setMac(String mac) {
+        this.mac = mac;
+    }
+
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -51,6 +65,7 @@ public class App {
     public String toString() {
         return "App{" +
                 "app=" + app +
+                ", mac='" + mac + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 '}';
     }
