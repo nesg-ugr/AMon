@@ -253,7 +253,7 @@ public class DbDumper {
                 Software.getInstalledApplication(mContext)) {
             app_list.add(new App_(
                     applicationInfo.packageName,
-                    Util.bitSetToInteger(Software.permissionsAsBitArray(Software.permissionsOfApp(mContext, applicationInfo))),
+                    Util.bitSetToBase64(Software.permissionsAsBitArray(Software.permissionsOfApp(mContext, applicationInfo))),
                     Software.versionOfApp(mContext,applicationInfo),
                     Software.isAutoStarted(mContext, applicationInfo)
             ));

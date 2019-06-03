@@ -3,8 +3,6 @@ package es.ugr.mdsm.restDump;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.math.BigInteger;
-
 public class App_ {
 
     @SerializedName("name")
@@ -12,7 +10,7 @@ public class App_ {
     private String name;
     @SerializedName("permissions")
     @Expose
-    private BigInteger permissions;
+    private String permissions;
     @SerializedName("version")
     @Expose
     private String version;
@@ -34,7 +32,7 @@ public class App_ {
      * @param permissions
      * @param version
      */
-    public App_(String name, BigInteger permissions, String version, Boolean autoStart) {
+    public App_(String name, String permissions, String version, Boolean autoStart) {
         super();
         this.name = name;
         this.permissions = permissions;
@@ -50,11 +48,11 @@ public class App_ {
         this.name = name;
     }
 
-    public BigInteger getPermissions() {
+    public String getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(BigInteger permissions) {
+    public void setPermissions(String permissions) {
         this.permissions = permissions;
     }
 

@@ -1,5 +1,7 @@
 package es.ugr.mdsm.restDump;
 
+import android.util.Base64;
+
 import java.math.BigInteger;
 import java.util.BitSet;
 
@@ -9,10 +11,16 @@ public class Util {
         byte[] bytes = bitSet.toByteArray();
         reverseByteArray(bytes);
         if (bytes.length > 0) {
-            return new BigInteger(bytes);
+            return new BigInteger(1, bytes);
         }else{
             return new BigInteger("0");
         }
+    }
+
+    public static String bitSetToBase64(BitSet bitSet){
+        byte[] bytes = bitSet.toByteArray();
+        reverseByteArray(bytes);
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
 
     public static void reverseByteArray(byte[] bytes){
