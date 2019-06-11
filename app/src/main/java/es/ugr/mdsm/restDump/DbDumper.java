@@ -9,11 +9,8 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import es.ugr.mdsm.deviceInfo.Probes;
@@ -42,6 +39,7 @@ public class DbDumper {
     private Runnable sensorPush;
     private Api api;
     private DatabaseHelper dh;
+    private boolean started;
 
     public DbDumper(int interval, Context context){
         mInterval = interval;
@@ -114,8 +112,8 @@ public class DbDumper {
 
     private void flowDump(){
         final long now = Calendar.getInstance().getTimeInMillis();
-        List<Flow> flows = new ArrayList<>();
-        FlowDump flowDump;
+        List<Flow_> flows = new ArrayList<>();
+        Flow flow;
         Gson gson = new Gson();
 
         // Read flows since now
@@ -128,7 +126,7 @@ public class DbDumper {
                 return;
             }else{
                 while (cursor.moveToNext()){
-                    flows.add(new Flow(
+                    flows.add(new Flow_(
                             cursor.getString(cursor.getColumnIndex("packageName")),
                             cursor.getLong(cursor.getColumnIndex("time")),
                             cursor.getLong(cursor.getColumnIndex("duration")),
@@ -150,12 +148,12 @@ public class DbDumper {
             }
         }
 
-        flowDump = new FlowDump(getFormattedMac(), flows);
+        flow = new Flow(getFormattedMac(), flows);
 
-        Log.d(TAG, gson.toJson(flowDump));
+        Log.d(TAG, gson.toJson(flow));
 
         // Post data
-        api.postFlows(flowDump)
+        api.postFlows(flow)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Response<Void>>(){
@@ -252,7 +250,7 @@ public class DbDumper {
         for (ApplicationInfo applicationInfo :
                 Software.getInstalledApplication(mContext)) {
             app_list.add(new App_(
-                    applicationInfo.packageName,
+                    Util.anonymizeApp(mContext, applicationInfo.packageName),
                     Util.bitSetToBase64(Software.permissionsAsBitArray(Software.permissionsOfApp(mContext, applicationInfo))),
                     Software.versionOfApp(mContext,applicationInfo),
                     Software.isAutoStarted(mContext, applicationInfo)

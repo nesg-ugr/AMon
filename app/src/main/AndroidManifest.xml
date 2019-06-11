@@ -50,9 +50,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppThemeTeal"
-        tools:ignore="ManifestResource"
-        android:usesCleartextTraffic="${usesCleartextTraffic}">
-        <!--TODO: Need to be removed-->
+        tools:ignore="ManifestResource">
 
         <meta-data
             android:name="android.max_aspect"

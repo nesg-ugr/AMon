@@ -628,10 +628,12 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
             // Clear expired DNS records
             DatabaseHelper.getInstance(ServiceSinkhole.this).cleanupDns();
 
+            /*
             // Check for update
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ServiceSinkhole.this);
             if (!Util.isPlayStoreInstall(ServiceSinkhole.this) && prefs.getBoolean("update_check", true))
                 checkUpdate();
+            */
         }
 
         private void watchdog(Intent intent) {
@@ -786,10 +788,16 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         } catch (PackageManager.NameNotFoundException ignored) {
                         }
                     }
+
                     String address = Networking.getNetworkAddress(ServiceSinkhole.this);
                     if(address != null){
                         flow.SAddr = address;
                         Log.d(TAG, "Source address changed to: "+ address);
+                    }
+
+                    boolean anonymize = prefs.getBoolean("anonymizeApp", false);
+                    if(anonymize){
+                        flow.DAddr = flow.DAddr.substring(0, flow.DAddr.lastIndexOf(".")+1) + "0";
                     }
 
 
@@ -802,7 +810,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         Log.d(TAG, "Updating flow: "+flow);
                         dh.updateFlow(flow, info==null ? null : info.packageName);
                     }*/
-                    dh.compactFlow(flow, info==null ? null : info.packageName);
+                    dh.compactFlow(flow, info==null ? null : es.ugr.mdsm.restDump.Util.anonymizeApp(ServiceSinkhole.this, info.packageName));
                 }
             }
         }

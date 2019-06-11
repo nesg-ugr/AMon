@@ -5,13 +5,13 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface Api {
-    String ENDPOINT = "http://mdsm1.ugr.es/";
+    String ENDPOINT = "https://mdsm1.ugr.es/";
 
     @POST("device")
     Observable<Response<Void>> postDevice(@Body Device device);
 
     @POST("flow")
-    Observable<Response<Void>> postFlows(@Body FlowDump flowDump);
+    Observable<Response<Void>> postFlows(@Body Flow flow);
 
     @POST("app")
     Observable<Response<Void>> postApp(@Body App app);

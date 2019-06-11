@@ -69,17 +69,19 @@ public class ActivityMain extends AppCompatActivity {
     //private ImageView ivIcon;
     //private ImageView ivQueue;
     private Switch swEnabled;
+    private Switch swAnonymize;
     //private ImageView ivMetered;
     private AlertDialog dialogFirst = null;
     private AlertDialog dialogVpn = null;
     private AlertDialog dialogDoze = null;
     //private AlertDialog dialogAbout = null;
 
+    private DbDumper dbDumper;
     private static final int REQUEST_VPN = 1;
     private static final int REQUEST_LOGCAT = 2;
     public static final int REQUEST_ROAMING = 3;
     public static final int REQUEST_PCAP = 4;
-    public static final int INTERVAL_UPDATE = 5*60*1000;
+    public static final int INTERVAL_UPDATE = 20*1000;
 
     private static final int MIN_SDK = Build.VERSION_CODES.LOLLIPOP_MR1;
 
@@ -125,29 +127,28 @@ public class ActivityMain extends AppCompatActivity {
         collectFlow(true);
         // Enable PCAP file
         enablePcap(null);
+        // Enable anoymization
+        anonymizeData(true);
         findViewById(R.id.pcapButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 exportPcap();
             }
         });
+        findViewById(R.id.pcapButton).setVisibility(View.INVISIBLE);
 
         boolean enabled = prefs.getBoolean("enabled", false);
+        boolean anonymize = prefs.getBoolean("anonymizeApp", false);
         boolean initialized = prefs.getBoolean("initialized", false);
 
         // Upgrade - Modify some prefs, could be extracted.
         ReceiverAutostart.upgrade(initialized, this);
         //prefs.edit().putBoolean("lockdown_wifi",false).apply();
         //prefs.edit().putBoolean("lockdown_other",false).apply();
-
-        DbDumper dbDumper = new DbDumper(20*1000, this);
-        dbDumper.dumpDeviceInfo();
-        dbDumper.dumpAppInfo();
-        dbDumper.dumpSensorInfo();
+        dbDumper = new DbDumper(INTERVAL_UPDATE, this);
         dbDumper.start();
 
-        new PremiumTelephonyChecker(this);
-
+        once();
 
         // Debug switch
         swEnabled = findViewById(R.id.swEnabled);
@@ -156,6 +157,15 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 activateVpn(isChecked);
+            }
+        });
+
+        swAnonymize = findViewById(R.id.swAnonymize);
+        swAnonymize.setChecked(anonymize);
+        swAnonymize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                prefs.edit().putBoolean("anonymizeApp", isChecked).apply();
             }
         });
 
@@ -224,6 +234,8 @@ public class ActivityMain extends AppCompatActivity {
                     })
                     .create();
             dialogFirst.show();
+
+
         }
 
         // Handle intent
@@ -681,6 +693,21 @@ public class ActivityMain extends AppCompatActivity {
 
         } else{
             ServiceSinkhole.stop("switch off", ActivityMain.this, false);
+            prefs.edit().putBoolean("enabled", false).apply();
+        }
+    }
+
+    private void once(){
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean initialized = prefs.getBoolean("initialized", false);
+
+        if(!initialized){
+            dbDumper.dumpDeviceInfo();
+            dbDumper.dumpAppInfo();
+            dbDumper.dumpSensorInfo();
+
+            // new PremiumTelephonyChecker(this);
+
         }
     }
 
@@ -764,5 +791,16 @@ public class ActivityMain extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().putBoolean("collect_flow", enabled).apply();
         ServiceSinkhole.reload("changed flow capturing", this, false);
+    }
+
+    public boolean isDataAnonymized(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("anonymizeApp",false);
+    }
+
+    public void anonymizeData(boolean enabled){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("anonymizeApp", enabled).apply();
+        ServiceSinkhole.reload("changed anonymization", this, false);
     }
 }

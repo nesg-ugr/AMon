@@ -27,6 +27,7 @@ android {
             // https://developer.android.com/ndk/guides/abis.html#sa
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
+
     }
     signingConfigs {
         release {
@@ -75,8 +76,6 @@ android {
             buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
             buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
 
-            // TODO: Need to be removed
-            manifestPlaceholders = [usesCleartextTraffic:"true"]
         }
     }
 }
@@ -96,5 +95,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
     implementation 'com.scottyab:rootbeer-lib:0.0.7'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
 }
