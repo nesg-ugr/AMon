@@ -8,12 +8,12 @@ android {
     compileSdkVersion = 28
 
     defaultConfig {
-        applicationId = "eu.faircode.netguard"
-        versionName = "2.228"
+        applicationId = "es.ugr.mdsm.amon"
+        versionName = "1.0"
         minSdkVersion 23
         targetSdkVersion 28
         versionCode = 1
-        archivesBaseName = "NetGuard-v$versionName"
+        archivesBaseName = "AMon-v$versionName"
 
         externalNativeBuild {
             cmake {
@@ -56,8 +56,8 @@ android {
             proguardFiles.add(file('proguard-rules.pro'))
             signingConfig signingConfigs.release
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "false"
-            buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
-            buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
+            // buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
+            // buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
         }
         play {
             minifyEnabled = true
@@ -65,17 +65,16 @@ android {
             signingConfig signingConfigs.release
             proguardFiles.add(file('proguard-rules.pro'))
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "true"
-            buildConfigField "String", "HOSTS_FILE_URI", "\"\""
-            buildConfigField "String", "GITHUB_LATEST_API", "\"\""
+            // buildConfigField "String", "HOSTS_FILE_URI", "\"\""
+            // buildConfigField "String", "GITHUB_LATEST_API", "\"\""
         }
         debug {
             minifyEnabled = true
             useProguard = true
             proguardFiles.add(file('proguard-rules.pro'))
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "false"
-            buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
-            buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
-
+            // buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
+            // buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
         }
     }
 }

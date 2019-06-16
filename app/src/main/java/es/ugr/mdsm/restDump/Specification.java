@@ -13,7 +13,7 @@ public class Specification {
     private Long ramTotal;
     @SerializedName("batteryTotal")
     @Expose
-    private Integer batteryTotal;
+    private Double batteryTotal;
 
     /**
      * No args constructor for use in serialization
@@ -28,7 +28,7 @@ public class Specification {
      * @param ramTotal
      * @param batteryTotal
      */
-    public Specification(Integer cpuCores, Long ramTotal, Integer batteryTotal) {
+    public Specification(Integer cpuCores, Long ramTotal, Double batteryTotal) {
         super();
         this.cpuCores = cpuCores;
         this.ramTotal = ramTotal;
@@ -51,11 +51,11 @@ public class Specification {
         this.ramTotal = ramTotal;
     }
 
-    public Integer getBatteryTotal() {
+    public Double getBatteryTotal() {
         return batteryTotal;
     }
 
-    public void setBatteryTotal(Integer batteryTotal) {
+    public void setBatteryTotal(Double batteryTotal) {
         this.batteryTotal = batteryTotal;
     }
 

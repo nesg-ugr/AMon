@@ -133,7 +133,7 @@ public class ServiceExternal extends IntentService {
 
     private static Notification getForegroundNotification(Context context) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "foreground");
-        builder.setSmallIcon(R.drawable.ic_hourglass_empty_white_24dp);
+        //builder.setSmallIcon(R.drawable.ic_hourglass_empty_white_24dp);
         builder.setPriority(NotificationCompat.PRIORITY_MIN);
         builder.setCategory(NotificationCompat.CATEGORY_STATUS);
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);

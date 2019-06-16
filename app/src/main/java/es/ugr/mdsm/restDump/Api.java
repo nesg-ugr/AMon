@@ -11,7 +11,10 @@ public interface Api {
     Observable<Response<Void>> postDevice(@Body Device device);
 
     @POST("flow")
-    Observable<Response<Void>> postFlows(@Body Flow flow);
+    Observable<Response<Void>> postFlow(@Body Flow flow);
+
+    @POST("compactFlow")
+    Observable<Response<Void>> postCompactFlow(@Body Flow flow);
 
     @POST("app")
     Observable<Response<Void>> postApp(@Body App app);

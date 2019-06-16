@@ -38,7 +38,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,7 +48,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.BitSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,8 +57,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import es.ugr.mdsm.deviceInfo.PremiumTelephonyChecker;
-import es.ugr.mdsm.deviceInfo.Software;
 import es.ugr.mdsm.restDump.DbDumper;
 
 public class ActivityMain extends AppCompatActivity {
@@ -68,7 +65,8 @@ public class ActivityMain extends AppCompatActivity {
     private boolean running = false;
     //private ImageView ivIcon;
     //private ImageView ivQueue;
-    private Switch swEnabled;
+    private ImageButton imgSwitch;
+    private boolean swEnabled;
     private Switch swAnonymize;
     //private ImageView ivMetered;
     private AlertDialog dialogFirst = null;
@@ -128,7 +126,14 @@ public class ActivityMain extends AppCompatActivity {
         // Enable PCAP file
         enablePcap(null);
         // Enable anoymization
-        anonymizeData(true);
+        anonymizeData(false);
+        // Compact flows
+        compactFlow(false);
+
+        prefs.edit().putBoolean("whitelist_other", false).apply();
+        prefs.edit().putBoolean("whitelist_wifi", false).apply();
+
+        /*
         findViewById(R.id.pcapButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,8 +141,9 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
         findViewById(R.id.pcapButton).setVisibility(View.INVISIBLE);
+        */
 
-        boolean enabled = prefs.getBoolean("enabled", false);
+        final boolean enabled = prefs.getBoolean("enabled", false);
         boolean anonymize = prefs.getBoolean("anonymizeApp", false);
         boolean initialized = prefs.getBoolean("initialized", false);
 
@@ -145,29 +151,33 @@ public class ActivityMain extends AppCompatActivity {
         ReceiverAutostart.upgrade(initialized, this);
         //prefs.edit().putBoolean("lockdown_wifi",false).apply();
         //prefs.edit().putBoolean("lockdown_other",false).apply();
-        dbDumper = new DbDumper(INTERVAL_UPDATE, this);
+        dbDumper = new DbDumper(this);
         dbDumper.start();
+        dbDumper.dumpAppInfo();
+        dbDumper.dumpDeviceInfo();
 
         once();
 
         // Debug switch
-        swEnabled = findViewById(R.id.swEnabled);
-        swEnabled.setChecked(enabled);
-        swEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        imgSwitch = findViewById(R.id.swEnabled);
+        swEnabled = enabled;
+        updateSwitchImage();
+        imgSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                activateVpn(isChecked);
+            public void onClick(View v) {
+                swEnabled = !swEnabled;
+                activateVpn(swEnabled);
             }
         });
 
-        swAnonymize = findViewById(R.id.swAnonymize);
+        /*swAnonymize = findViewById(R.id.swAnonymize);
         swAnonymize.setChecked(anonymize);
         swAnonymize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 prefs.edit().putBoolean("anonymizeApp", isChecked).apply();
             }
-        });
+        });*/
 
         if (!getIntent().hasExtra(EXTRA_APPROVE)) {
             if (enabled)
@@ -242,6 +252,10 @@ public class ActivityMain extends AppCompatActivity {
         checkExtras(getIntent());
     }
 
+    private void updateSwitchImage(){
+        imgSwitch.setImageResource(swEnabled ? R.drawable.icon : R.drawable.icon_grayscale);
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         Log.i(TAG, "New intent");
@@ -267,7 +281,8 @@ public class ActivityMain extends AppCompatActivity {
 
         // Visual feedback
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        swEnabled.setChecked(prefs.getBoolean("enabled",false));
+        swEnabled = prefs.getBoolean("enabled", false);
+        updateSwitchImage();
     }
 
     @Override
@@ -331,6 +346,8 @@ public class ActivityMain extends AppCompatActivity {
             // Handle VPN approval
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             prefs.edit().putBoolean("enabled", resultCode == RESULT_OK).apply();
+            swEnabled = resultCode == RESULT_OK;
+            updateSwitchImage();
             prefs.edit().putBoolean("filter", true).apply();
             if (resultCode == RESULT_OK) {
                 ServiceSinkhole.start("prepared", this);
@@ -671,6 +688,8 @@ public class ActivityMain extends AppCompatActivity {
                                         } catch (Throwable ex) {
                                             Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
                                             onActivityResult(REQUEST_VPN, RESULT_CANCELED, null);
+                                            swEnabled = false;
+                                            updateSwitchImage();
                                             prefs.edit().putBoolean("enabled", false).apply();
                                         }
                                     }
@@ -688,11 +707,15 @@ public class ActivityMain extends AppCompatActivity {
             } catch (Throwable ex) {
                 // Prepare failed
                 Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
+                swEnabled = false;
+                updateSwitchImage();
                 prefs.edit().putBoolean("enabled", false).apply();
             }
 
         } else{
             ServiceSinkhole.stop("switch off", ActivityMain.this, false);
+            swEnabled = false;
+            updateSwitchImage();
             prefs.edit().putBoolean("enabled", false).apply();
         }
     }
@@ -802,5 +825,16 @@ public class ActivityMain extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().putBoolean("anonymizeApp", enabled).apply();
         ServiceSinkhole.reload("changed anonymization", this, false);
+    }
+
+    public boolean isFlowCompacted(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean("compactFlow",false);
+    }
+
+    public void compactFlow(boolean enabled){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("compactFlow", enabled).apply();
+        ServiceSinkhole.reload("changed flow compaction", this, false);
     }
 }

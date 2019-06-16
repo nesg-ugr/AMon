@@ -12,12 +12,15 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 
 public class Probes {
+
+    private final static String TAG = "MDSM.Probes";
 
     public static int batteryLevel(Context context){
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -31,6 +34,30 @@ public class Probes {
         Intent batteryStatus = context.registerReceiver(null, ifilter);
 
         return batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+    }
+
+    public static double batteryCapacity(Context context) {
+        Object mPowerProfile;
+        double batteryCapacity = 0;
+        final String POWER_PROFILE_CLASS = "com.android.internal.os.PowerProfile";
+
+        try {
+            mPowerProfile = Class.forName(POWER_PROFILE_CLASS)
+                    .getConstructor(Context.class)
+                    .newInstance(context);
+
+            batteryCapacity = (double) Class
+                    .forName(POWER_PROFILE_CLASS)
+                    .getMethod("getBatteryCapacity")
+                    .invoke(mPowerProfile);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Battery Capacity can't be acquired", e);
+            batteryCapacity = 0;
+        }
+
+        return batteryCapacity;
+
     }
 
     // Return ram value in bytes

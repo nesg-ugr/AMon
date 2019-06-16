@@ -65,10 +65,11 @@ public class ReceiverAutostart extends BroadcastReceiver {
             if (oldVersion == newVersion)
                 return;
             Log.i(TAG, "Upgrading from version " + oldVersion + " to " + newVersion);
-
+            /*
             SharedPreferences.Editor editor = prefs.edit();
 
             if (initialized) {
+
                 if (oldVersion < 38) {
                     Log.i(TAG, "Converting screen wifi/mobile");
                     editor.putBoolean("screen_wifi", prefs.getBoolean("unused", false));
@@ -120,6 +121,8 @@ public class ReceiverAutostart extends BroadcastReceiver {
 
             editor.putInt("version", newVersion);
             editor.apply();
+        */
         }
+
     }
 }

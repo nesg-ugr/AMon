@@ -427,7 +427,7 @@ public class Util {
     }
 
     public static boolean hasXposed(Context context) {
-        if (true || !isPlayStoreInstall(context))
+        if (!isPlayStoreInstall(context))
             return false;
         for (StackTraceElement ste : Thread.currentThread().getStackTrace())
             if (ste.getClassName().startsWith("de.robv.android.xposed"))

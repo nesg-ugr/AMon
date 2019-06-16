@@ -41,6 +41,7 @@
     boolean isDomainBlocked(java.lang.String);
     eu.faircode.netguard.Allowed isAddressAllowed(eu.faircode.netguard.Packet);
     void accountUsage(eu.faircode.netguard.Usage);
+    void captureFlow(eu.faircode.netguard.Flow);
 }
 
 #AndroidX

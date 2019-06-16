@@ -2,9 +2,11 @@ package es.ugr.mdsm.restDump;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -28,54 +30,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class DbDumper {
     private static final String TAG = "MDSM.DbDumper";
     private static final int MINIMAL_AMOUNT_FLOWS = 10;
+    public static final long DEFAULT_INTERVAL = 60*1000; // in ms
 
-    private long mInterval;   // in ms
     private Context mContext;
     private Handler restHandler;
-    private Runnable periodicUpdate;
-    private Runnable asyncUpdate;
-    private Runnable devicePush;
-    private Runnable appPush;
-    private Runnable sensorPush;
     private Api api;
     private DatabaseHelper dh;
-    private boolean started;
 
-    public DbDumper(int interval, Context context){
-        mInterval = interval;
+    public DbDumper(Context context){
         mContext = context;
         restHandler = new Handler();
-        periodicUpdate = new Runnable() {
-            @Override
-            public void run() {
-                flowDump();
-                restHandler.postDelayed(this, mInterval);
-            }
-        };
-        asyncUpdate = new Runnable() {
-            @Override
-            public void run() {
-                flowDump();
-            }
-        };
-        devicePush = new Runnable() {
-            @Override
-            public void run() {
-                deviceDump();
-            }
-        };
-        appPush = new Runnable() {
-            @Override
-            public void run() {
-                appDump();
-            }
-        };
-        sensorPush = new Runnable() {
-            @Override
-            public void run() {
-                sensorDump();
-            }
-        };
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Api.ENDPOINT)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -86,31 +51,109 @@ public class DbDumper {
         dh = DatabaseHelper.getInstance(mContext);
     }
 
+    // Start a periodic dump of all the tasks with a default interval
     public void start(){
-        restHandler.post(periodicUpdate);
+        dumpFlowInfo(DEFAULT_INTERVAL);
+        dumpSensorInfo(DEFAULT_INTERVAL);
     }
 
-    public void async(){
-        restHandler.post(asyncUpdate);
+    // Stop all pending callbacks and messages
+    public void stop(){
+        restHandler.removeCallbacksAndMessages(null);
     }
 
+    // Async call to flowPush
+    public void dumpFlowInfo(){
+        Runnable flowPush = new Runnable() {
+            @Override
+            public void run() {
+                flowDump();
+            }
+        };
+        restHandler.post(flowPush);
+    }
+
+    // Periodic call to flowPush
+    public void dumpFlowInfo(final long interval){
+        Runnable flowPush = new Runnable() {
+            @Override
+            public void run() {
+                flowDump();
+                restHandler.postDelayed(this, interval);
+            }
+        };
+        restHandler.post(flowPush);
+    }
+
+    // Async call to devicePush
     public void dumpDeviceInfo(){
+        Runnable devicePush = new Runnable() {
+            @Override
+            public void run() {
+                deviceDump();
+            }
+        };
         restHandler.post(devicePush);
     }
 
+    // Periodic call to flowPush
+    public void dumpDeviceInfo(final long interval){
+        Runnable devicePush = new Runnable() {
+            @Override
+            public void run() {
+                deviceDump();
+                restHandler.postDelayed(this, interval);
+            }
+        };
+        restHandler.post(devicePush);
+    }
+
+    // Async call to appPush
     public void dumpAppInfo(){
+        Runnable appPush = new Runnable() {
+            @Override
+            public void run() {
+                appDump();
+            }
+        };
         restHandler.post(appPush);
     }
 
-    public void dumpSensorInfo(){
-        restHandler.post(sensorPush);
-    }
-    public void stop(){
-        restHandler.removeCallbacks(periodicUpdate);
-        restHandler.removeCallbacks(asyncUpdate);
+    // Periodic call to appPush
+    public void dumpAppInfo(final long interval){
+        Runnable appPush = new Runnable() {
+            @Override
+            public void run() {
+                appDump();
+                restHandler.postDelayed(this, interval);
+            }
+        };
+        restHandler.post(appPush);
     }
 
-    private void flowDump(){
+    // Async call to sensorPush
+    public void dumpSensorInfo(){
+        Runnable sensorPush = new Runnable() {
+            @Override
+            public void run() {
+                sensorDump();
+            }
+        };
+        restHandler.post(sensorPush);
+    }
+
+    public void dumpSensorInfo(final long interval){
+        Runnable sensorPush = new Runnable() {
+            @Override
+            public void run() {
+                sensorDump();
+                restHandler.postDelayed(this, interval);
+            }
+        };
+        restHandler.post(sensorPush);
+    }
+
+    public void flowDump(){
         final long now = Calendar.getInstance().getTimeInMillis();
         List<Flow_> flows = new ArrayList<>();
         Flow flow;
@@ -152,44 +195,81 @@ public class DbDumper {
 
         Log.d(TAG, gson.toJson(flow));
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        boolean compact = prefs.getBoolean("compactFlow", false);
+
         // Post data
-        api.postFlows(flow)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Response<Void>>(){
-                    @Override
-                    public void onSubscribe(Disposable d) {
+        if(compact) {
+            api.postCompactFlow(flow)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Response<Void>>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
 
-                    }
-
-                    @Override
-                    public void onNext(Response response) {
-                        if(response.isSuccessful()){
-                            Log.i(TAG, "Successful flows POST");
-                            // Remove everything
-                            dh.safeCleanupFlow(now);
-                            // Remove only finished flows
-                            // dh.cleanupFinishedFlow(now);
-                        }else{
-                            Log.w(TAG, "Failed to POST flows");
                         }
 
-                    }
+                        @Override
+                        public void onNext(Response response) {
+                            if (response.isSuccessful()) {
+                                Log.i(TAG, "Successful compact flows POST");
+                                // Remove everything
+                                dh.safeCleanupFlow(now);
+                                // Remove only finished flows
+                                // dh.cleanupFinishedFlow(now);
+                            } else {
+                                Log.w(TAG, "Failed to POST compact flows");
+                            }
+                        }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG,"Error in flows POST",e);
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "Error in compact flows POST", e);
+                        }
 
-                    @Override
-                    public void onComplete() {
+                        @Override
+                        public void onComplete() {
 
-                    }
-                });
+                        }
+                    });
+        }else {
+            api.postFlow(flow)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Response<Void>>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
 
+                        }
+
+                        @Override
+                        public void onNext(Response response) {
+                            if (response.isSuccessful()) {
+                                Log.i(TAG, "Successful flows POST");
+                                // Remove everything
+                                dh.safeCleanupFlow(now);
+                                // Remove only finished flows
+                                // dh.cleanupFinishedFlow(now);
+                            } else {
+                                Log.w(TAG, "Failed to POST flows");
+                            }
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "Error in flows POST", e);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }
     }
 
-    private void deviceDump(){
+    public void deviceDump(){
 
         Device device = new Device(
                 getFormattedMac(),
@@ -207,7 +287,7 @@ public class DbDumper {
                         android.os.Build.TIME,
                         android.os.Build.FINGERPRINT
                 ),
-                new Specification(Probes.numCpuCores(), Probes.ramTotal(mContext), Probes.batteryTotal(mContext)),
+                new Specification(Probes.numCpuCores(), Probes.ramTotal(mContext), Probes.batteryCapacity(mContext)),
                 getTimeStamp()
         );
 
@@ -244,7 +324,7 @@ public class DbDumper {
                 });
     }
 
-    private void appDump(){
+    public void appDump(){
 
         List<App_> app_list = new ArrayList<>();
         for (ApplicationInfo applicationInfo :
@@ -296,7 +376,7 @@ public class DbDumper {
 
     }
 
-    private void sensorDump(){
+    public void sensorDump(){
 
         Sensor sensor = new Sensor(
                 new Connectivity(

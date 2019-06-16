@@ -272,13 +272,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ", ToS INTEGER " +
                 ", NewFlow INTEGER " +
                 ", Finished INTEGER " +
-                ", last_modified DEFAULT CURRENT_TIMESTAMP" +
+                ", last_modified INTEGER " +
                 ");");
     }
 
     private void addTriggers(SQLiteDatabase db) {
         Log.i(TAG, "Adding triggers");
-        db.execSQL("CREATE TRIGGER last_modified_trigger"+
+        db.execSQL("CREATE TRIGGER last_modified_insert_trigger"+
+                " AFTER INSERT ON flow FOR EACH ROW" +
+                " BEGIN" +
+                " UPDATE flow SET last_modified = CAST((strftime('%s','now')- strftime('%S','now')+ strftime('%f','now'))*1000 AS INTEGER);" +
+                " END");
+        db.execSQL("CREATE TRIGGER last_modified_update_trigger"+
                 " AFTER UPDATE ON flow FOR EACH ROW" +
                 " BEGIN" +
                 " UPDATE flow SET last_modified = CAST((strftime('%s','now')- strftime('%S','now')+ strftime('%f','now'))*1000 AS INTEGER);" +
