@@ -124,7 +124,7 @@ public class ActivityMain extends AppCompatActivity {
         // Enable flow collecting
         collectFlow(true);
         // Enable PCAP file
-        enablePcap(null);
+        // enablePcap(null);
         // Enable anoymization
         anonymizeData(false);
         // Compact flows
@@ -170,14 +170,6 @@ public class ActivityMain extends AppCompatActivity {
             }
         });
 
-        /*swAnonymize = findViewById(R.id.swAnonymize);
-        swAnonymize.setChecked(anonymize);
-        swAnonymize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                prefs.edit().putBoolean("anonymizeApp", isChecked).apply();
-            }
-        });*/
 
         if (!getIntent().hasExtra(EXTRA_APPROVE)) {
             if (enabled)

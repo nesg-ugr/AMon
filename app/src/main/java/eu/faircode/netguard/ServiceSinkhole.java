@@ -2965,7 +2965,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         TypedValue tv = new TypedValue();
         getTheme().resolveAttribute(R.attr.colorPrimary, tv, true);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "notify");
-        builder.setSmallIcon(R.drawable.icon_black_and_white)
+        builder.setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(name)
                 .setContentText(getString(R.string.msg_update))
                 .setContentIntent(pi)
