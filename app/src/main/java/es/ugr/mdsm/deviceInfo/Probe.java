@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 
-public class Probes {
+public class Probe {
 
-    private final static String TAG = "MDSM.Probes";
+    private final static String TAG = "MDSM.Probe";
 
     public static int batteryLevel(Context context){
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -192,7 +192,6 @@ public class Probes {
                 // Some problem accessible private API
                 return false;
             }
-
         }
     }
 
@@ -202,6 +201,11 @@ public class Probes {
 
     public static boolean isAirplaneModeEnabled(Context context) {
         return Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+    }
+
+    public static boolean isNetworkLocationEnabled(Context context){
+        LocationManager locationManager = (LocationManager) context.getSystemService( Context.LOCATION_SERVICE );
+        return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
 }

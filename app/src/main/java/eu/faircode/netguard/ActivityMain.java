@@ -16,6 +16,7 @@ package eu.faircode.netguard;
     Copyright 2015-2019 by Marcel Bokhorst (M66B)
 */
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,6 +58,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import es.ugr.mdsm.deviceInfo.Connection;
 import es.ugr.mdsm.restDump.DbDumper;
 
 public class ActivityMain extends AppCompatActivity {
@@ -79,7 +81,8 @@ public class ActivityMain extends AppCompatActivity {
     private static final int REQUEST_LOGCAT = 2;
     public static final int REQUEST_ROAMING = 3;
     public static final int REQUEST_PCAP = 4;
-    public static final int INTERVAL_UPDATE = 20*1000;
+    public static final int REQUEST_LOCATION = 5;
+    public static final int INTERVAL_UPDATE = 20 * 1000;
 
     private static final int MIN_SDK = Build.VERSION_CODES.LOLLIPOP_MR1;
 
@@ -157,6 +160,14 @@ public class ActivityMain extends AppCompatActivity {
         dbDumper.dumpDeviceInfo();
 
         once();
+
+        // Connection.bluetoothBoundedDevices();
+
+        /*if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION);
+        } else { // Won't be on release
+            Connection.unsecuredWifiConnection(this);
+        }*/
 
         // Debug switch
         imgSwitch = findViewById(R.id.swEnabled);
@@ -244,7 +255,7 @@ public class ActivityMain extends AppCompatActivity {
         checkExtras(getIntent());
     }
 
-    private void updateSwitchImage(){
+    private void updateSwitchImage() {
         imgSwitch.setImageResource(swEnabled ? R.drawable.icon : R.drawable.icon_grayscale);
     }
 
@@ -362,8 +373,8 @@ public class ActivityMain extends AppCompatActivity {
                 Log.i(TAG, "Export URI=" + target);
                 Util.sendLogcat(target, this);
             }
-        }else if (requestCode == REQUEST_PCAP){
-            if (resultCode == RESULT_OK && data != null){
+        } else if (requestCode == REQUEST_PCAP) {
+            if (resultCode == RESULT_OK && data != null) {
                 handleExportPCAP(data);
             }
         } else {
@@ -374,9 +385,16 @@ public class ActivityMain extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_ROAMING)
+        if (requestCode == REQUEST_ROAMING) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 ServiceSinkhole.reload("permission granted", this, false);
+        } else if (requestCode == REQUEST_LOCATION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    Connection.unsecuredWifiConnection(this);
+                }
+            }
+        }
     }
 
     private BroadcastReceiver onRulesChanged = new BroadcastReceiver() {

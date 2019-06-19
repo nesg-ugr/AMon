@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import es.ugr.mdsm.deviceInfo.Probes;
+import es.ugr.mdsm.deviceInfo.Probe;
 import es.ugr.mdsm.deviceInfo.Software;
 import eu.faircode.netguard.DatabaseHelper;
 import io.reactivex.Observer;
@@ -287,7 +287,7 @@ public class DbDumper {
                         android.os.Build.TIME,
                         android.os.Build.FINGERPRINT
                 ),
-                new Specification(Probes.numCpuCores(), Probes.ramTotal(mContext), Probes.batteryCapacity(mContext)),
+                new Specification(Probe.numCpuCores(), Probe.ramTotal(mContext), Probe.batteryCapacity(mContext)),
                 getTimeStamp()
         );
 
@@ -380,16 +380,16 @@ public class DbDumper {
 
         Sensor sensor = new Sensor(
                 new Connectivity(
-                        Probes.isMobileDataEnabled(mContext),
-                        Probes.isWifiEnabled(mContext),
-                        Probes.isAirplaneModeEnabled(mContext),
-                        Probes.isBluetoothEnabled(),
-                        Probes.isGpsEnabled(mContext)
+                        Probe.isMobileDataEnabled(mContext),
+                        Probe.isWifiEnabled(mContext),
+                        Probe.isAirplaneModeEnabled(mContext),
+                        Probe.isBluetoothEnabled(),
+                        Probe.isGpsEnabled(mContext)
                 ),
                 new Stat(
-                        Probes.cpuUsage(),
-                        Probes.ramUsage(mContext),
-                        Probes.batteryLevel(mContext)
+                        Probe.cpuUsage(),
+                        Probe.ramUsage(mContext),
+                        Probe.batteryLevel(mContext)
                 ),
                 new Security(
                         Software.isUnknownSourcesEnabled(mContext),
