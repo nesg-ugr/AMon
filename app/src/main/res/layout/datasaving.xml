@@ -24,7 +24,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:text="@string/app_name"
-            android:textAppearance="@style/TextLarge"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/msg_datasaving"
-                android:textAppearance="@style/TextMedium" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <CheckBox
                 android:id="@+id/cbDontAsk"
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/title_dontask"
-                android:textAppearance="@style/TextMedium" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

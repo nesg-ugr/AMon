@@ -44,7 +44,7 @@ public class ReceiverAutostart extends BroadcastReceiver {
                 upgrade(true, context);
 
                 // Start service
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 if (prefs.getBoolean("enabled", false))
                     ServiceSinkhole.start("receiver", context);
                 else if (prefs.getBoolean("show_stats", false))
@@ -59,7 +59,7 @@ public class ReceiverAutostart extends BroadcastReceiver {
 
     public static void upgrade(boolean initialized, Context context) {
         synchronized (context.getApplicationContext()) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
             int oldVersion = prefs.getInt("version", -1);
             int newVersion = Util.getSelfVersionCode(context);
             if (oldVersion == newVersion)

@@ -106,7 +106,7 @@ public class ActivityMain extends AppCompatActivity {
         if (Build.VERSION.SDK_INT < MIN_SDK) {
             Log.i(TAG, "SDK=" + Build.VERSION.SDK_INT);
             super.onCreate(savedInstanceState);
-            setContentView(R.layout.android);
+            //setContentView(R.layout.android);
             return;
         }
 
@@ -116,7 +116,7 @@ public class ActivityMain extends AppCompatActivity {
 
         running = true;
 
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
 
         // Disable traffic lockdown
         lockNetwork(false);
@@ -193,12 +193,12 @@ public class ActivityMain extends AppCompatActivity {
             checkDoze();
 
         // Listen for rule set changes
-        IntentFilter ifr = new IntentFilter(ACTION_RULES_CHANGED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(onRulesChanged, ifr);
+//        IntentFilter ifr = new IntentFilter(ACTION_RULES_CHANGED);
+//        LocalBroadcastManager.getInstance(this).registerReceiver(onRulesChanged, ifr);
 
         // Listen for queue changes
-        IntentFilter ifq = new IntentFilter(ACTION_QUEUE_CHANGED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(onQueueChanged, ifq);
+//        IntentFilter ifq = new IntentFilter(ACTION_QUEUE_CHANGED);
+//        LocalBroadcastManager.getInstance(this).registerReceiver(onQueueChanged, ifq);
 
         // Listen for added/removed applications
         IntentFilter intentFilter = new IntentFilter();
@@ -214,11 +214,11 @@ public class ActivityMain extends AppCompatActivity {
             View view = inflater.inflate(R.layout.first, null, false);
 
             TextView tvFirst = view.findViewById(R.id.tvFirst);
-            TextView tvEula = view.findViewById(R.id.tvEula);
-            TextView tvPrivacy = view.findViewById(R.id.tvPrivacy);
+            // TextView tvEula = view.findViewById(R.id.tvEula);
+            // TextView tvPrivacy = view.findViewById(R.id.tvPrivacy);
             tvFirst.setMovementMethod(LinkMovementMethod.getInstance());
-            tvEula.setMovementMethod(LinkMovementMethod.getInstance());
-            tvPrivacy.setMovementMethod(LinkMovementMethod.getInstance());
+            // tvEula.setMovementMethod(LinkMovementMethod.getInstance());
+            // tvPrivacy.setMovementMethod(LinkMovementMethod.getInstance());
 
             // Show dialog
             dialogFirst = new AlertDialog.Builder(this)
@@ -283,7 +283,7 @@ public class ActivityMain extends AppCompatActivity {
         super.onResume();
 
         // Visual feedback
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         swEnabled = prefs.getBoolean("enabled", false);
         updateSwitchImage();
     }
@@ -318,10 +318,10 @@ public class ActivityMain extends AppCompatActivity {
 
         running = false;
 
-        //PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+        //getSharedPreferences("Vpn", Context.MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(this);
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(onRulesChanged);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(onQueueChanged);
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(onRulesChanged);
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(onQueueChanged);
         unregisterReceiver(packageChangedReceiver);
 
         if (dialogFirst != null) {
@@ -346,8 +346,8 @@ public class ActivityMain extends AppCompatActivity {
         Util.logExtras(data);
 
         if (requestCode == REQUEST_VPN) {
-            // Handle VPN approval
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            // Handle Vpn approval
+            SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
             prefs.edit().putBoolean("enabled", resultCode == RESULT_OK).apply();
             swEnabled = resultCode == RESULT_OK;
             updateSwitchImage();
@@ -424,7 +424,7 @@ public class ActivityMain extends AppCompatActivity {
     private void checkExtras(Intent intent) {
         // Approve request
         if (intent.hasExtra(EXTRA_APPROVE)) {
-            Log.i(TAG, "Requesting VPN approval");
+            Log.i(TAG, "Requesting Vpn approval");
             //swEnabled.toggle();
             activateVpn(!isVpnActivated());
         }
@@ -441,7 +441,7 @@ public class ActivityMain extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             final Intent doze = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
             if (Util.batteryOptimizing(this) && getPackageManager().resolveActivity(doze, 0) != null) {
-                final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                final SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 if (!prefs.getBoolean("nodoze", false)) {
                     LayoutInflater inflater = LayoutInflater.from(this);
                     View view = inflater.inflate(R.layout.doze, null, false);
@@ -484,7 +484,7 @@ public class ActivityMain extends AppCompatActivity {
                     Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS,
                     Uri.parse("package:" + getPackageName()));
             if (Util.dataSaving(this) && getPackageManager().resolveActivity(settings, 0) != null) {
-                final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                final SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 if (!prefs.getBoolean("nodata", false)) {
                     LayoutInflater inflater = LayoutInflater.from(this);
                     View view = inflater.inflate(R.layout.datasaving, null, false);
@@ -528,14 +528,14 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public void enablePcap(File file){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
 
         prefs.edit().putBoolean("pcap", true).apply();
         ServiceSinkhole.setPcap(true, file, this);
     }
 
     public void clearPcapLog(File file){
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         final File pcap_file = file;
 
         new AsyncTask<Object, Object, Object>() {
@@ -624,7 +624,7 @@ public class ActivityMain extends AppCompatActivity {
                         }
 
                     // Resume capture
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ActivityMain.this);
+                    SharedPreferences prefs = getSharedPreferences("Vpn", MODE_PRIVATE);
                     if (prefs.getBoolean("pcap", false))
                         ServiceSinkhole.setPcap(true,null, ActivityMain.this);
                 }
@@ -641,13 +641,13 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public boolean isVpnActivated(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("enabled",false);
     }
 
     // Exported functionality from the previous switch.
     public void activateVpn(boolean enabled){
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         if(enabled){
             String alwaysOn = Settings.Secure.getString(getContentResolver(), "always_on_vpn_app");
             Log.i(TAG, "Always-on=" + alwaysOn);
@@ -731,7 +731,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void once(){
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         boolean initialized = prefs.getBoolean("initialized", false);
 
         if(!initialized){
@@ -745,47 +745,47 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public boolean isNetworkLocked(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("lockdown",false);
     }
 
     public void lockNetwork(boolean locked){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("lockdown",locked).apply();
         ServiceSinkhole.reload("changed lockdown", this, false);
         //WidgetLockdown.updateWidgets(this);
     }
 
     public boolean isLogging(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("log",false);
 
     }
 
     public void logging(boolean enabled) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("log",enabled).apply();
         ServiceSinkhole.reload("changed logging", this, false);
 
     }
 
     public boolean isLoggingApp(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("log_app",false);
     }
 
     public void appLogging(boolean enabled){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("log_app",enabled).apply();
     }
 
     public boolean isUsageTracked(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("track_usage",false) && isLoggingApp();
     }
 
     public void trackUsage(boolean enabled){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("track_usage", enabled).apply();
         ServiceSinkhole.reload("changed tracking", this, false);
     }
@@ -793,7 +793,7 @@ public class ActivityMain extends AppCompatActivity {
     // Unused
     public Map<String, Boolean> loggedPackets(){
         Map<String, Boolean> booleanMap = new HashMap<>();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         booleanMap.put("proto_udp",prefs.getBoolean("proto_udp",false));
         booleanMap.put("proto_tcp",prefs.getBoolean("proto_tcp",false));
         booleanMap.put("proto_other",prefs.getBoolean("proto_other",false));
@@ -806,7 +806,7 @@ public class ActivityMain extends AppCompatActivity {
     // Unused
     public void packetLogging(boolean udp, boolean tcp, boolean other,
                               boolean traffic_allowed, boolean traffic_blocked){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("proto_udp",udp).apply();
         prefs.edit().putBoolean("proto_tcp",tcp).apply();
         prefs.edit().putBoolean("proto_other",other).apply();
@@ -816,34 +816,34 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     public boolean isFlowCollected(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("collect_flow",false);
     }
 
     public void collectFlow(boolean enabled){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("collect_flow", enabled).apply();
         ServiceSinkhole.reload("changed flow capturing", this, false);
     }
 
     public boolean isDataAnonymized(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("anonymizeApp",false);
     }
 
     public void anonymizeData(boolean enabled){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("anonymizeApp", enabled).apply();
         ServiceSinkhole.reload("changed anonymization", this, false);
     }
 
     public boolean isFlowCompacted(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         return prefs.getBoolean("compactFlow",false);
     }
 
     public void compactFlow(boolean enabled){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         prefs.edit().putBoolean("compactFlow", enabled).apply();
         ServiceSinkhole.reload("changed flow compaction", this, false);
     }

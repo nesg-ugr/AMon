@@ -1,11 +1,9 @@
 <resources>
     <string name="app_name" translatable="false">AMon</string>
-    <string name="app_description">NetGuard provides simple and advanced ways to block access to the internet - no root required. Apps and addresses can individually be allowed or denied access to your Wi-Fi and/or mobile connection.</string>
-    <string name="app_copyright" translatable="false">Copyright \u00A9 2015–2019 by M. Bokhorst (M66B)</string>
-    <string name="app_android">NetGuard requires Android 5.1 or later</string>
-    <string name="app_eula" translatable="false">THIS SOFTWARE IS PROVIDED BY THE AUTHOR \'\'AS IS\'\' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</string>
-    <string name="app_privacy"><a href="https://www.netguard.me/privacy/">Privacy policy</a></string>
-    <string name="app_first">Great care has been taken to develop and test NetGuard, however it is impossible to guarantee NetGuard will work correctly on every device.</string>
+    <string name="app_description">AMon supports the investigation project MDSM developed by NESG. AMon will gather non-sensitive information from your device to mobile devices security. All the information will be sent to a remote server for future study.</string>
+    <string name="app_android">AMon requires Android 6.0 or later</string>
+    <!--<string name="app_eula" translatable="false">THIS SOFTWARE IS PROVIDED BY THE AUTHOR \'\'AS IS\'\' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</string>-->
+    <string name="app_first">AMon will gather non-sensitive data from your device to support the investigation project MDSM.   More information related to the gathered data can be found in <a href="https://mdsm1.ugr.es/static/en/gathered_data.html">https://mdsm1.ugr.es/static/en/gathered_data.html</a>.   AMon will be running in background after its activation and won\'t disturb the user experience.</string>
     <string name="app_agree">I agree</string>
     <string name="app_disagree">I disagree</string>
 
@@ -18,44 +16,53 @@
     <string name="msg_packages">%1$d allowed, %2$d blocked</string>
     <string name="msg_hosts">%1$d allowed, %2$d blocked, %3$d hosts</string>
     <string name="msg_waiting">Waiting for event</string>
-    <string name="msg_revoked">NetGuard has been disabled, likely by using another VPN based app</string>
+    <string name="msg_revoked">AMon has been disabled, likely by using another VPN based app</string>
     <string name="msg_installed">\'%1$s\' installed</string>
     <string name="msg_installed_n">Has been installed</string>
     <string name="msg_access">%1$s attempted internet access</string>
     <string name="msg_access_n">Attempted internet access</string>
     <string name="msg_completed">Action completed</string>
-    <string name="msg_vpn">NetGuard uses a local VPN to filter internet traffic.
-For this reason, please allow a VPN connection in the next dialog.
-Your internet traffic is not being sent to a remote VPN server.</string>
-    <string name="msg_autostart">NetGuard could not start automatically. This is likely because of a bug in your Android version.</string>
+    <string name="msg_vpn">AMon uses a local VPN to register internet traffic. For this reason, please allow a VPN connection in the next dialog.</string>
+    <string name="msg_autostart">AMon could not start automatically. This is likely because of a bug in your Android version.</string>
     <string name="msg_error">An unexpected error has occurred: \'%s\'</string>
     <string name="msg_start_failed">Android refused to start the VPN service at this moment. This is likely because of a bug in your Android version.</string>
     <string name="msg_dimming">If you cannot press OK in the next dialog, another (screen dimming) app is likely manipulating the screen.</string>
-    <string name="msg_kbsec">%7.3f KB/s</string>
-    <string name="msg_mbsec">%7.3f MB/s</string>
-    <string name="msg_doze">For consistent results, the Android battery optimizations should be disabled for NetGuard.
-\n\nIn the next dialog, select \"All apps\" at the top, tap on NetGuard in the list and select and confirm \"Don\'t optimize\".</string>
-    <string name="msg_datasaving">For consistent results, the Android data saving options should be disabled for NetGuard
+    <string name="msg_kbsec" translatable="false">%7.3f KB/s</string>
+    <string name="msg_mbsec" translatable="false">%7.3f MB/s</string>
+    <string name="msg_doze">For consistent results, the Android battery optimizations should be disabled.
+\n\nIn the next dialog, select \"All apps\" at the top, tap on AMon in the list and select and confirm \"Don\'t optimize\
+\n\nSome additional changes could be needed for some models. Follow the in-app instructions if you experience an unexpected crash".</string>
+    <string name="msg_datasaving">For consistent results, the Android data saving options should be disabled for AMon
 \n\nIn the next dialog, enable the options \"Background data\" and \"Unrestricted data usage\"</string>
-    <string name="msg_update">Update available, tap to download</string>
+    <!--<string name="msg_update">Update available, tap to download</string>-->
     <string name="msg_issue">Please describe the problem and indicate the time of the problem:</string>
     <string name="msg_vpn_cancelled">VPN connection cancelled\nDid you configure another VPN to be an always-on VPN?</string>
-    <string name="msg_on">Powering down your device with NetGuard enabled, will automatically start NetGuard on powering up your device</string>
+    <string name="msg_on">Powering down your device with AMon enabled, will automatically start AMon on powering up your device</string>
     <string name="msg_always_on">Another VPN is set as Always-on VPN</string>
-    <string name="msg_always_on_lockdown">Turn off "Block connections without VPN" in Android VPN settings to use NetGuard in filtering mode</string>
-    <string name="msg_private_dns">Turn off "Private DNS" in Android network settings to use NetGuard in filtering mode</string>
+    <string name="msg_always_on_lockdown">Turn off Block connections without VPN in Android VPN settings to use AMon in filtering mode</string>
+    <string name="msg_private_dns">Turn off \"Private DNS\" in Android network settings to use AMon in filtering mode</string>
 
     <string name="title_internet">has no internet permission</string>
 
-    <string name="title_allow_wifi">Allow Wi-Fi</string>
-    <string name="title_block_wifi">Block Wi-Fi</string>
-    <string name="title_allow_other">Allow mobile</string>
-    <string name="title_block_other">Block mobile</string>
-    <string name="title_root">root</string>
-    <string name="title_mediaserver">mediaserver</string>
+    <string name="title_root" translatable="false">root</string>
+    <string name="title_mediaserver" translatable="false">mediaserver</string>
     <string name="title_gpsdaemon" translatable="false">GPS daemon</string>
-    <string name="title_nobody">nobody</string>
+    <string name="title_nobody" translatable="false">nobody</string>
     <string name="title_dontask">Don\'t ask again</string>
+    <string name="textSwitchOn">Disable AMon</string>
+    <string name="textSwitchOff">Enable AMon</string>
+    <string name="battery_saving">Battery Saving</string>
+    <string name="go">Go</string>
+    <string name="step">Step %1$d</string>
+    <string name="step_description_batterySaving">Select \"Battery Saving\" and choose \"No restrictions\"</string>
+    <string name="step_description_autostart">Check \"Autostart\" toggle</string>
+    <string name="step_description_lock">Open the Recent screen (also known as Recent Apps or Recent Task List). Then, lock AMon swiping or long pressing on it and pressing the lock icon. (This last step can vary between Android versions)</string>
+    <string name="step_doze">Allow AMon to ignore batttert optimizations.</string>
+    <string name="step_data">Enable \"Background data\".</string>
+    <string name="amon_help">To enable/disable AMon, click on the shield. \n\nThe shield will be colored when enabled and grayed out when disabled.</string>
+    <string name="step_no">All the battery saving changes have been done.</string>
+    <string name="msg_working">AMon is running in the background.</string>
+    <string name="msg_blocked">Some application has been blocked.</string>
+    <string name="msg_connection_lost">Internet connection is unavailable.</string>
 
-    <string name="fingerprint" translatable="false">ef46f813d2c8a064d72c936b9b96d1cccc989378</string>
 </resources>

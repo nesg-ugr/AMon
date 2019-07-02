@@ -23,7 +23,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:text="@string/app_name"
-            android:textAppearance="@style/TextLarge"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -43,23 +43,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/app_first"
-                android:textAppearance="@style/TextMedium" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/tvEula"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/app_eula"
-                android:textAppearance="@style/TextSmall" />
+                android:textAppearance="@style/TextSmall" />-->
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/tvPrivacy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/app_privacy"
-                android:textAppearance="@style/TextMedium" />
+                android:textAppearance="@style/TextMedium" />-->
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

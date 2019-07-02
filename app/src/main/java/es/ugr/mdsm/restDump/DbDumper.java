@@ -53,8 +53,12 @@ public class DbDumper {
 
     // Start a periodic dump of all the tasks with a default interval
     public void start(){
-        dumpFlowInfo(DEFAULT_INTERVAL);
-        dumpSensorInfo(DEFAULT_INTERVAL);
+        start(DEFAULT_INTERVAL);
+    }
+
+    public void start(long interval){
+        dumpFlowInfo(interval);
+        dumpSensorInfo(interval);
     }
 
     // Stop all pending callbacks and messages

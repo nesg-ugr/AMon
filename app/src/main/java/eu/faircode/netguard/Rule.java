@@ -195,7 +195,7 @@ public class Rule {
 
     public static List<Rule> getRules(final boolean all, Context context) {
         synchronized (context.getApplicationContext()) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
             SharedPreferences wifi = context.getSharedPreferences("wifi", Context.MODE_PRIVATE);
             SharedPreferences other = context.getSharedPreferences("other", Context.MODE_PRIVATE);
             SharedPreferences screen_wifi = context.getSharedPreferences("screen_wifi", Context.MODE_PRIVATE);
@@ -418,7 +418,7 @@ public class Rule {
     }
 
     public void updateChanged(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         boolean screen_on = prefs.getBoolean("screen_on", false);
         boolean default_wifi = prefs.getBoolean("whitelist_wifi", true) && screen_on;
         boolean default_other = prefs.getBoolean("whitelist_other", true) && screen_on;

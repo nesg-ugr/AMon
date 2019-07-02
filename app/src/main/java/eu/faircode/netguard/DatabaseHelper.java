@@ -128,7 +128,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
 
         if (!once) {
             once = true;

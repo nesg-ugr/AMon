@@ -24,6 +24,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,12 +49,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -464,14 +467,17 @@ public class Util {
         }
     }
 
+    /*
     public static boolean hasValidFingerprint(Context context) {
         String calculated = getFingerprint(context);
         String expected = context.getString(R.string.fingerprint);
         return (calculated != null && calculated.equals(expected));
     }
+    */
 
+    /*
     public static void setTheme(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
         boolean dark = prefs.getBoolean("dark_theme", false);
         String theme = prefs.getString("theme", "teal");
         if (theme.equals("teal"))
@@ -490,6 +496,7 @@ public class Util {
         if (context instanceof Activity)
             setTaskColor(context);
     }
+    */
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static void setTaskColor(Context context) {
@@ -842,7 +849,7 @@ public class Util {
                 sb.append(String.format("Host: %s\r\n", Build.HOST));
                 sb.append(String.format("Display: %s\r\n", Build.DISPLAY));
                 sb.append(String.format("Id: %s\r\n", Build.ID));
-                sb.append(String.format("Fingerprint: %B\r\n", hasValidFingerprint(context)));
+                // sb.append(String.format("Fingerprint: %B\r\n", hasValidFingerprint(context)));
 
                 String abi;
                 abi = (Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "?");
@@ -850,7 +857,7 @@ public class Util {
 
                 sb.append("\r\n");
 
-                sb.append(String.format("VPN dialogs: %B\r\n", isPackageInstalled("com.android.vpndialogs", context)));
+                sb.append(String.format("VpnActivity dialogs: %B\r\n", isPackageInstalled("com.android.vpndialogs", context)));
                 try {
                     sb.append(String.format("Prepared: %B\r\n", VpnService.prepare(context) == null));
                 } catch (Throwable ex) {
@@ -867,7 +874,7 @@ public class Util {
                 sb.append("DNS system:\r\n");
                 for (String dns : getDefaultDNS(context))
                     sb.append("- ").append(dns).append("\r\n");
-                sb.append("DNS VPN:\r\n");
+                sb.append("DNS Vpn:\r\n");
                 for (InetAddress dns : ServiceSinkhole.getDns(context))
                     sb.append("- ").append(dns).append("\r\n");
                 sb.append("\r\n");
@@ -895,7 +902,7 @@ public class Util {
                 }
 
                 // Get settings
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 Map<String, ?> all = prefs.getAll();
                 for (String key : all.keySet())
                     sb.append("Setting: ").append(key).append('=').append(all.get(key)).append("\r\n");
@@ -1026,5 +1033,89 @@ public class Util {
                 }
         }
         return builder;
+    }
+
+
+    public static void checkDoze(final Context mContext) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final Intent doze = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+            if (Util.batteryOptimizing(mContext) && mContext.getPackageManager().resolveActivity(doze, 0) != null) {
+                final SharedPreferences prefs = mContext.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
+                if (!prefs.getBoolean("nodoze", false)) {
+                    LayoutInflater inflater = LayoutInflater.from(mContext);
+                    View view = inflater.inflate(R.layout.doze, null, false);
+                    final CheckBox cbDontAsk = view.findViewById(R.id.cbDontAsk);
+                    final Dialog[] dialogDoze = {null};
+                    dialogDoze[0] = new AlertDialog.Builder(mContext)
+                            .setView(view)
+                            .setCancelable(true)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    prefs.edit().putBoolean("nodoze", cbDontAsk.isChecked()).apply();
+                                    mContext.startActivity(doze);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    prefs.edit().putBoolean("nodoze", cbDontAsk.isChecked()).apply();
+                                }
+                            })
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface) {
+                                    dialogDoze[0] = null;
+                                    checkDataSaving(mContext);
+                                }
+                            })
+                            .create();
+                    dialogDoze[0].show();
+                } else
+                    checkDataSaving(mContext);
+            } else
+                checkDataSaving(mContext);
+        }
+    }
+
+    private static void checkDataSaving(final Context mContext) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            final Intent settings = new Intent(
+                    Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS,
+                    Uri.parse("package:" + mContext.getPackageName()));
+            if (Util.dataSaving(mContext) && mContext.getPackageManager().resolveActivity(settings, 0) != null) {
+                final SharedPreferences prefs = mContext.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
+                if (!prefs.getBoolean("nodata", false)) {
+                    LayoutInflater inflater = LayoutInflater.from(mContext);
+                    View view = inflater.inflate(R.layout.datasaving, null, false);
+                    final CheckBox cbDontAsk = view.findViewById(R.id.cbDontAsk);
+                    final Dialog[] dialogDoze = {null};
+                    dialogDoze[0] = new AlertDialog.Builder(mContext)
+                            .setView(view)
+                            .setCancelable(true)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    prefs.edit().putBoolean("nodata", cbDontAsk.isChecked()).apply();
+                                    mContext.startActivity(settings);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    prefs.edit().putBoolean("nodata", cbDontAsk.isChecked()).apply();
+                                }
+                            })
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface) {
+                                    dialogDoze[0] = null;
+                                }
+                            })
+                            .create();
+                    dialogDoze[0].show();
+                }
+            }
+        }
     }
 }
