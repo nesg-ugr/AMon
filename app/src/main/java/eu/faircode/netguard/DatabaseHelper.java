@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -35,10 +36,12 @@ import android.util.Log;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -46,6 +49,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "Netguard";
     private static final int DB_VERSION = 21;
+
+    public static final int FLOW_COLUMN = 16;
 
     private static boolean once = true;
     private static List<LogChangedListener> logChangedListeners = new ArrayList<>();
@@ -128,10 +133,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        // super(context, null, null, DB_VERSION);
         prefs = context.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
 
         if (!once) {
             once = true;
+
 
             File dbfile = context.getDatabasePath(DB_NAME);
             if (dbfile.exists()) {
@@ -1364,6 +1371,169 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         notifyLogChanged();
     }
 
+    public void bulkInsertFlow(List<Flow> flowBuffer){
+        /*if (!DatabaseHelper.enableTableFlow){
+            Log.e(TAG, "Flow table is not created.");
+            return;
+        }*/
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+                ContentValues cv = new ContentValues();
+
+                for (Flow flow :
+                        flowBuffer) {
+
+                    cv.put("time", flow.Time);
+                    cv.put("duration", flow.Duration);
+
+                    if (flow.Protocol < 0)
+                        cv.putNull("protocol");
+                    else
+                        cv.put("protocol", flow.Protocol);
+
+                    cv.put("saddr", flow.SAddr);
+
+                    if (flow.SPort < 0)
+                        cv.putNull("sport");
+                    else
+                        cv.put("sport", flow.SPort);
+
+                    cv.put("daddr", flow.DAddr);
+                    if (flow.DPort < 0)
+                        cv.putNull("dport");
+                    else
+                        cv.put("dport", flow.DPort);
+
+                    cv.put("sent",flow.Sent);
+                    cv.put("received",flow.Received);
+
+                    cv.put("sentPackets",flow.SentPackets);
+                    cv.put("receivedPackets",flow.ReceivedPackets);
+
+                    if(flow.Protocol == 6){
+                        cv.put("tcpFlags", flow.TcpFlags);
+                    }else{
+                        cv.putNull("tcpFlags");
+                    }
+
+                    cv.put("ToS", flow.Tos);
+
+                    cv.put("NewFlow", flow.NewFlow);
+                    cv.put("Finished", flow.Finished);
+
+                    cv.put("packageName", flow.PackageName);
+
+                    if (db.insert("flow", null, cv) == -1)
+                        Log.e(TAG, "Insert flow failed");
+                }
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
+    public void rawBulkInsertFlow(List<Flow> flowBuffer){
+        /*if (!DatabaseHelper.enableTableFlow){
+            Log.e(TAG, "Flow table is not created.");
+            return;
+        }*/
+
+        lock.writeLock().lock();
+        try {
+
+            // https://medium.com/@JasonWyatt/squeezing-performance-from-sqlite-insertions-971aff98eef2
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+
+            rawInsert(db,flowBuffer);
+
+            db.setTransactionSuccessful();
+            db.endTransaction();
+
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
+    private void rawInsert(SQLiteDatabase db, List<Flow> flows){
+        int num_flows = flows.size();
+        if(flows.size()*FLOW_COLUMN > 999){
+            num_flows = 999/(FLOW_COLUMN);
+            rawInsert(db, flows.subList(num_flows, flows.size()));
+        }
+
+        List<Flow> trimmedFlows = flows.subList(0, num_flows);
+
+        List<Object> values = new ArrayList<>();
+        StringBuilder valuesQuery = new StringBuilder();
+        for (int i=0; i<trimmedFlows.size(); i++){
+            if(i != 0) {
+                valuesQuery.append(", ");
+            }
+            valuesQuery.append("(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            values.addAll(Arrays.asList(trimmedFlows.get(i).toArray()));
+        }
+
+        String columns = "packageName, time, duration, protocol, saddr, sport, daddr, dport, sent, received, sentPackets, receivedPackets, tcpFlags, ToS, NewFlow, Finished";
+        db.execSQL("INSERT INTO flow("+columns+") VALUES "+valuesQuery.toString(), values.toArray());
+
+
+    }
+
+    public void compiledBulkInsertFlow(List<Flow> flowBuffer){
+        lock.writeLock().lock();
+        try{
+            String sql = "INSERT INTO flow (packageName, time, duration, protocol, saddr, sport, daddr, dport, sent, received, sentPackets, receivedPackets, tcpFlags, ToS, NewFlow, Finished) "+
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            SQLiteDatabase db = dh.getWritableDatabase();
+            SQLiteStatement stmt = db.compileStatement(sql);
+
+            db.beginTransactionNonExclusive();
+            for (Flow flow :
+                    flowBuffer) {
+                stmt.clearBindings();
+                stmt.bindString(1, flow.PackageName);
+                stmt.bindLong(2, flow.Time);
+                stmt.bindLong(3, flow.Duration);
+                stmt.bindLong(4, flow.Protocol);
+                stmt.bindString(5, flow.SAddr);
+                stmt.bindLong(6, flow.SPort);
+                stmt.bindString(7, flow.DAddr);
+                stmt.bindLong(8, flow.DPort);
+                stmt.bindLong(9, flow.Sent);
+                stmt.bindLong(10, flow.Received);
+                stmt.bindLong(11, flow.SentPackets);
+                stmt.bindLong(12, flow.ReceivedPackets);
+                stmt.bindLong(13, flow.TcpFlags);
+                stmt.bindLong(14, flow.Tos);
+                stmt.bindLong(15, flow.NewFlow?1:0);
+                stmt.bindLong(16, flow.Finished?1:0);
+                stmt.executeInsert();
+            }
+
+            db.setTransactionSuccessful();
+            db.endTransaction();
+
+
+        }finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
     // Replace with the latest instance of the flow
     public void updateFlow(Flow flow, String packageName){
 
@@ -1537,6 +1707,107 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     }
                 }
                 cursor.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        notifyLogChanged();
+    }
+
+    public void bulkCompactFlow(List<Flow> flowBuffer){
+
+        lock.writeLock().lock();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.beginTransactionNonExclusive();
+            try {
+
+
+                String whereClause =
+                        "packageName = ? AND " +
+                                "time = ? AND " +
+                                "duration < ? AND " +
+                                "protocol = ? AND " +
+                                "saddr = ? AND " +
+                                "sport = ? AND " +
+                                "daddr = ? AND " +
+                                "dport = ? AND " +
+                                "Finished = 0";
+                String[] whereArgs;
+                ContentValues cv = new ContentValues();
+
+                for (Flow flow :
+                        flowBuffer) {
+
+                    cv.put("time", flow.Time);
+                    cv.put("duration", flow.Duration);
+
+                    if (flow.Protocol < 0)
+                        cv.putNull("protocol");
+                    else
+                        cv.put("protocol", flow.Protocol);
+
+                    cv.put("saddr", flow.SAddr);
+                    if (flow.SPort < 0)
+                        cv.putNull("sport");
+                    else
+                        cv.put("sport", flow.SPort);
+
+                    cv.put("daddr", flow.DAddr);
+                    if (flow.DPort < 0)
+                        cv.putNull("dport");
+                    else
+                        cv.put("dport", flow.DPort);
+
+                    cv.put("sent", flow.Sent);
+                    cv.put("received", flow.Received);
+
+                    cv.put("sentPackets", flow.SentPackets);
+                    cv.put("receivedPackets", flow.ReceivedPackets);
+
+                    if (flow.Protocol == 6) {
+                        cv.put("tcpFlags", flow.TcpFlags);
+                    } else {
+                        cv.putNull("tcpFlags");
+                    }
+
+                    cv.put("ToS", flow.Tos);
+
+                    cv.put("packageName", flow.PackageName);
+
+                    whereArgs = new String[]{
+                            cv.getAsString("packageName"),
+                            cv.getAsString("time"),
+                            cv.getAsString("duration"),
+                            cv.getAsString("protocol"),
+                            cv.getAsString("saddr"),
+                            cv.getAsString("sport"),
+                            cv.getAsString("daddr"),
+                            cv.getAsString("dport")
+                    };
+                    Cursor cursor = db.rawQuery(
+                            "SELECT ID, NewFlow, Finished FROM flow WHERE " + whereClause, whereArgs);
+                    if (cursor.getCount() == 0) {
+                        cv.put("NewFlow", flow.NewFlow);
+                        cv.put("Finished", flow.Finished);
+                        if (db.insert("flow", null, cv) == -1) {
+                            Log.e(TAG, "Insert flow failed");
+                        }
+                    } else {
+                        cursor.moveToFirst();
+                        cv.put("NewFlow", cursor.getInt(cursor.getColumnIndex("NewFlow")) | (flow.NewFlow ? 1 : 0));
+                        cv.put("Finished", cursor.getInt(cursor.getColumnIndex("Finished")) | (flow.Finished ? 1 : 0));
+                        if (db.update("flow", cv, "ID=?",
+                                new String[]{cursor.getString(cursor.getColumnIndex("ID"))}) == -1) {
+                            Log.e(TAG, "Udpate flow failed");
+                        }
+                    }
+                    cursor.close();
+                }
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();

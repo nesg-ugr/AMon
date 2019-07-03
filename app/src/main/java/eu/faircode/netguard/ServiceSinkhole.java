@@ -100,10 +100,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -115,9 +118,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import es.ugr.mdsm.amon.MainActivity;
 import es.ugr.mdsm.deviceInfo.Networking;
+import es.ugr.mdsm.deviceInfo.Software;
 
 public class ServiceSinkhole extends VpnService implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "NetGuard.Service";
+    private static final int BUFFER_LIMIT = 600;
+    private static final long INSERT_INTERVAL = 60 * 1000; //millis
 
     private boolean registeredUser = false;
     private boolean registeredIdleState = false;
@@ -140,6 +146,8 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     private int last_blocked = -1;
     private int last_hosts = -1;
 
+    private long last_insert = 0;
+
     private long jni_context = 0;
     private Thread tunnelThread = null;
     private ServiceSinkhole.Builder last_builder = null;
@@ -161,6 +169,9 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     private volatile CommandHandler commandHandler;
     private volatile LogHandler logHandler;
     //private volatile StatsHandler statsHandler;
+
+    private List<Flow> flowBuffer = new ArrayList<>();
+    private static LinkedBlockingQueue<Flow> flowQueue = new LinkedBlockingQueue<>();
 
     private static final int NOTIFY_ENFORCING = 1;
     private static final int NOTIFY_WAITING = 2;
@@ -267,6 +278,10 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                 wlInstance.release();
             wlInstance = null;
         }
+    }
+
+    public static LinkedBlockingQueue<Flow> getQueue(){
+        return flowQueue;
     }
 
     private final class CommandHandler extends Handler {
@@ -617,7 +632,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                     startForeground(NOTIFY_WAITING, getWaitingNotification());
                     state = State.waiting;
                     Log.d(TAG, "Start foreground state=" + state.toString());
-                } else {
+//                } else {
                     state = State.none;
                     stopSelf();
                 }
@@ -782,16 +797,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                 SharedPreferences prefs = ServiceSinkhole.this.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 boolean collect_flow = prefs.getBoolean("collect_flow", false);
                 if(collect_flow){
-                    // TODO: Change to use getNameForUid()
-                    ApplicationInfo info = null;
-                    PackageManager pm = ServiceSinkhole.this.getPackageManager();
-                    String[] pkg = pm.getPackagesForUid(flow.Uid);
-                    if (pkg != null && pkg.length > 0){
-                        try {
-                            info = pm.getApplicationInfo(pkg[0], 0);
-                        } catch (PackageManager.NameNotFoundException ignored) {
-                        }
-                    }
+                    flow.PackageName = Software.getNameForUid(ServiceSinkhole.this, flow.Uid);
 
                     String address = Networking.getNetworkAddress(ServiceSinkhole.this);
                     if(address != null){
@@ -804,23 +810,34 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         flow.DAddr = flow.DAddr.substring(0, flow.DAddr.lastIndexOf(".")+1) + "0";
                     }
 
-
                     DatabaseHelper dh = DatabaseHelper.getInstance(ServiceSinkhole.this);
                     Log.i(TAG, "Collected flow " + flow);
-                    /*if(flow.NewFlow){
-                        Log.d(TAG, "Inserting flow: "+flow);
-                        dh.insertFlow(flow, info==null ? null : info.packageName);
-                    }else{
-                        Log.d(TAG, "Updating flow: "+flow);
-                        dh.updateFlow(flow, info==null ? null : info.packageName);
-                    }*/
-                    String packageName = info==null ? null : es.ugr.mdsm.restDump.Util.anonymizeApp(ServiceSinkhole.this, info.packageName);
-                    boolean compact = prefs.getBoolean("compactFlow", false);
-                    if(compact){
-                        dh.compactFlow(flow, packageName);
-                    }else{
-                        dh.insertFlow(flow, packageName);
+
+                    flowQueue.add(flow);
+
+                    /*
+                    flowBuffer.add(flow);
+
+                    if (last_insert == 0) {
+                        last_insert = System.currentTimeMillis();
                     }
+
+                    if (flowBuffer.size() >= BUFFER_LIMIT || System.currentTimeMillis() - last_insert > INSERT_INTERVAL){
+                        last_insert = System.currentTimeMillis();
+                        Log.d(TAG, "Writing flow buffer: " + flowBuffer.size() + " entries");
+
+                        boolean compact = prefs.getBoolean("compactFlow", false);
+                        if(compact){
+                            dh.bulkCompactFlow(flowBuffer);
+                        }else{
+                            dh.compiledBulkInsertFlow(flowBuffer);
+                            // dh.rawBulkInsertFlow(flowBuffer);
+                            // dh.bulkInsertFlow(flowBuffer);
+                        }
+
+                        flowBuffer.clear();
+                    }
+                    */
                 }
             }
         }

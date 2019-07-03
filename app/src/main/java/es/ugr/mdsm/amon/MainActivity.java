@@ -45,7 +45,10 @@ public class MainActivity extends VpnActivity {
         setWatchdog(5);
 
         boolean enabled = isVpnEnabled();
+
         updateDump(enabled);
+        dbDumper.dumpDeviceInfo();
+        dbDumper.dumpAppInfo();
         updateSwitch(enabled);
 
         View.OnClickListener listener = new View.OnClickListener() {
@@ -104,8 +107,6 @@ public class MainActivity extends VpnActivity {
     private void updateDump(boolean enabled){
         if(enabled){
             dbDumper.start();
-            dbDumper.dumpDeviceInfo();
-            dbDumper.dumpAppInfo();
         }else{
             dbDumper.stop();
         }

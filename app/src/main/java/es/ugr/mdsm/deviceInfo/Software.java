@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import es.ugr.mdsm.restDump.Connectivity;
+import es.ugr.mdsm.restDump.Util;
+
 public class Software {
 
     private final static String TAG = "DeviceInfo.Software";
@@ -236,6 +239,21 @@ public class Software {
         map.put("WRITE_SYNC_SETTINGS",false);
         map.put("WRITE_VOICEMAIL",false);
         return map;
+    }
+
+    public static String getNameForUid(Context context, int uid){
+        ApplicationInfo info = null;
+        PackageManager pm = context.getPackageManager();
+        String[] pkg = pm.getPackagesForUid(uid);
+        if (pkg != null && pkg.length > 0){
+            try {
+                info = pm.getApplicationInfo(pkg[0], 0);
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+        }
+
+        return info==null ? null : Util.anonymizeApp(context, info.packageName);
+
     }
 
 

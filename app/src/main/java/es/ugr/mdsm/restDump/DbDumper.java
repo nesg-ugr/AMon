@@ -14,10 +14,13 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import es.ugr.mdsm.deviceInfo.Probe;
 import es.ugr.mdsm.deviceInfo.Software;
 import eu.faircode.netguard.DatabaseHelper;
+import eu.faircode.netguard.ServiceSinkhole;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -29,13 +32,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DbDumper {
     private static final String TAG = "MDSM.DbDumper";
-    private static final int MINIMAL_AMOUNT_FLOWS = 10;
+    private static final int MINIMAL_AMOUNT_FLOWS = 20;
     public static final long DEFAULT_INTERVAL = 60*1000; // in ms
 
     private Context mContext;
     private Handler restHandler;
     private Api api;
     private DatabaseHelper dh;
+
+    private Runnable flowPush;
+    private Runnable flowPushPeriodic;
+    private Runnable devicePush;
+    private Runnable devicePushPeriodic;
+    private Runnable appPush;
+    private Runnable appPushPeriodic;
+    private Runnable sensorPush;
+    private Runnable sensorPushPeriodic;
+
 
     public DbDumper(Context context){
         mContext = context;
@@ -49,6 +62,8 @@ public class DbDumper {
 
         api = retrofit.create(Api.class);
         dh = DatabaseHelper.getInstance(mContext);
+
+
     }
 
     // Start a periodic dump of all the tasks with a default interval
@@ -68,7 +83,7 @@ public class DbDumper {
 
     // Async call to flowPush
     public void dumpFlowInfo(){
-        Runnable flowPush = new Runnable() {
+        flowPush = new Runnable() {
             @Override
             public void run() {
                 flowDump();
@@ -79,19 +94,20 @@ public class DbDumper {
 
     // Periodic call to flowPush
     public void dumpFlowInfo(final long interval){
-        Runnable flowPush = new Runnable() {
+        restHandler.removeCallbacks(flowPushPeriodic);
+        flowPushPeriodic = new Runnable() {
             @Override
             public void run() {
                 flowDump();
                 restHandler.postDelayed(this, interval);
             }
         };
-        restHandler.post(flowPush);
+        restHandler.post(flowPushPeriodic);
     }
 
     // Async call to devicePush
     public void dumpDeviceInfo(){
-        Runnable devicePush = new Runnable() {
+        devicePush = new Runnable() {
             @Override
             public void run() {
                 deviceDump();
@@ -102,19 +118,20 @@ public class DbDumper {
 
     // Periodic call to flowPush
     public void dumpDeviceInfo(final long interval){
-        Runnable devicePush = new Runnable() {
+        restHandler.removeCallbacks(devicePushPeriodic);
+        devicePushPeriodic = new Runnable() {
             @Override
             public void run() {
                 deviceDump();
                 restHandler.postDelayed(this, interval);
             }
         };
-        restHandler.post(devicePush);
+        restHandler.post(devicePushPeriodic);
     }
 
     // Async call to appPush
     public void dumpAppInfo(){
-        Runnable appPush = new Runnable() {
+        appPush = new Runnable() {
             @Override
             public void run() {
                 appDump();
@@ -125,19 +142,20 @@ public class DbDumper {
 
     // Periodic call to appPush
     public void dumpAppInfo(final long interval){
-        Runnable appPush = new Runnable() {
+        restHandler.removeCallbacks(appPushPeriodic);
+        appPushPeriodic = new Runnable() {
             @Override
             public void run() {
                 appDump();
                 restHandler.postDelayed(this, interval);
             }
         };
-        restHandler.post(appPush);
+        restHandler.post(appPushPeriodic);
     }
 
     // Async call to sensorPush
     public void dumpSensorInfo(){
-        Runnable sensorPush = new Runnable() {
+        sensorPush = new Runnable() {
             @Override
             public void run() {
                 sensorDump();
@@ -147,14 +165,15 @@ public class DbDumper {
     }
 
     public void dumpSensorInfo(final long interval){
-        Runnable sensorPush = new Runnable() {
+        restHandler.removeCallbacks(sensorPushPeriodic);
+        sensorPushPeriodic = new Runnable() {
             @Override
             public void run() {
                 sensorDump();
                 restHandler.postDelayed(this, interval);
             }
         };
-        restHandler.post(sensorPush);
+        restHandler.post(sensorPushPeriodic);
     }
 
     public void flowDump(){
@@ -163,6 +182,7 @@ public class DbDumper {
         Flow flow;
         Gson gson = new Gson();
 
+        /*
         // Read flows since now
         try (Cursor cursor = dh.getFlow(now)){
             if(cursor.getCount() <= 0){
@@ -193,6 +213,24 @@ public class DbDumper {
                             ));
                 }
             }
+        }
+        */
+        LinkedBlockingQueue<eu.faircode.netguard.Flow> flowQueue = ServiceSinkhole.getQueue();
+        ArrayList<eu.faircode.netguard.Flow> tempFlows = new ArrayList<>();
+        if (flowQueue.isEmpty()){
+            Log.d(TAG, "There's no flow entry to send");
+            return;
+        } else if(flowQueue.size()<= MINIMAL_AMOUNT_FLOWS){
+            Log.d(TAG, "Not enough flows");
+            return;
+        }else {
+            Log.d(TAG, "Dumping "+flowQueue.size()+" flows");
+            flowQueue.drainTo(tempFlows);
+        }
+
+        for (eu.faircode.netguard.Flow f:
+             tempFlows) {
+            flows.add(new Flow_(f));
         }
 
         flow = new Flow(getFormattedMac(), flows);
@@ -420,7 +458,7 @@ public class DbDumper {
                     @Override
                     public void onNext(Response response) {
                         if(response.isSuccessful()){
-                            Log.i(TAG, "Successful sensor push");
+                            Log.i(TAG, "Successful sensor POST");
                         }else{
                             Log.w(TAG, "Failed to POST sensor");
                         }

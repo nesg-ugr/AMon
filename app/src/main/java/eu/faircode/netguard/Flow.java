@@ -6,6 +6,7 @@ import java.util.Date;
 
 public class Flow {
     public int Uid;
+    public String PackageName;
     public long Time;
     public long Duration;
     public int Protocol;
@@ -24,6 +25,9 @@ public class Flow {
 
     private static DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
 
+    public Object[] toArray(){
+        return new Object[]{PackageName,Time,Duration,Protocol,SAddr,SPort,DAddr,DPort,Sent,Received,SentPackets,ReceivedPackets,TcpFlags,Tos,NewFlow,Finished};
+    }
     @Override
     public String toString() {
         return formatter.format(new Date(Time).getTime()) +
@@ -32,6 +36,7 @@ public class Flow {
                 " " + SAddr + "/" + SPort +
                 " " + DAddr + "/" + DPort +
                 " uid " + Uid +
+                " packageName " + PackageName +
                 " Bytes " + " out " + Sent + " in " + Received +
                 " Packets " + " out " + SentPackets + " in " + ReceivedPackets +
                 " Flags " + TcpFlags +

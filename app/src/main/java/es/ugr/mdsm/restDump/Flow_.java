@@ -100,6 +100,26 @@ public class Flow_ {
         this.finished = finished;
     }
 
+    public Flow_ (eu.faircode.netguard.Flow flow){
+        super();
+        this.packageName = flow.PackageName;
+        this.time = flow.Time;
+        this.duration = flow.Duration;
+        this.protocol = flow.Protocol;
+        this.saddr = flow.SAddr;
+        this.sport = flow.SPort;
+        this.daddr = flow.DAddr;
+        this.dport = flow.DPort;
+        this.sentBytes = flow.Sent;
+        this.receivedBytes = flow.Received;
+        this.sentPackets = flow.SentPackets;
+        this.receivedPackets = flow.ReceivedPackets;
+        this.tcpFlags = flow.TcpFlags;
+        this.toS = flow.Tos;
+        this.newFlow = flow.NewFlow;
+        this.finished = flow.Finished;
+    }
+
     public String getPackageName() {
         return packageName;
     }
