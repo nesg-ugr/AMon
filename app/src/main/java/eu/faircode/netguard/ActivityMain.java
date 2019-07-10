@@ -391,7 +391,8 @@ public class ActivityMain extends AppCompatActivity {
         } else if (requestCode == REQUEST_LOCATION) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Connection.unsecuredWifiConnection(this);
+                    // TODO
+                    //Connection.unsecuredWifiConnection(this);
                 }
             }
         }

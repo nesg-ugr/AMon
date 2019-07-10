@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -15,12 +16,10 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 
 import es.ugr.mdsm.deviceInfo.VpnActivity;
 import es.ugr.mdsm.restDump.DbDumper;
 import eu.faircode.netguard.R;
-import eu.faircode.netguard.Util;
 
 public class MainActivity extends VpnActivity {
 
@@ -28,6 +27,7 @@ public class MainActivity extends VpnActivity {
     private TextView textSwitch;
     private DbDumper dbDumper = null;
     private AlertDialog dialogFirst;
+    private AlertDialog dialogBattery;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class MainActivity extends VpnActivity {
 
         boolean enabled = isVpnEnabled();
 
-        updateDump(enabled);
+        periodicDump(enabled);
         dbDumper.dumpDeviceInfo();
         dbDumper.dumpAppInfo();
         updateSwitch(enabled);
@@ -64,6 +64,34 @@ public class MainActivity extends VpnActivity {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean initialized = prefs.getBoolean("initialized", false);
 
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        if(!pm.isIgnoringBatteryOptimizations(getPackageName())){
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View view = inflater.inflate(R.layout.battery_optimization, null, false);
+
+            TextView tvBattery = view.findViewById(R.id.tvBattery);
+            tvBattery.setMovementMethod(LinkMovementMethod.getInstance());
+
+            // Show dialog
+            dialogBattery = new AlertDialog.Builder(this)
+                    .setView(view)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(MainActivity.this, BatteryActivity.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            dialogBattery = null;
+                        }
+                    })
+                    .create();
+        }
+
         if(!initialized){
             LayoutInflater inflater = LayoutInflater.from(this);
             View view = inflater.inflate(R.layout.first, null, false);
@@ -78,6 +106,7 @@ public class MainActivity extends VpnActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             prefs.edit().putBoolean("initialized", true).apply();
+                            dialogBattery.show();
                         }
                     })
                     .setNegativeButton(R.string.app_disagree, new DialogInterface.OnClickListener() {
@@ -97,6 +126,21 @@ public class MainActivity extends VpnActivity {
 
         }
 
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbDumper.onDestroy();
+        if (dialogFirst != null) {
+            dialogFirst.dismiss();
+            dialogFirst = null;
+        }
+        if (dialogBattery != null) {
+            dialogBattery.dismiss();
+            dialogBattery = null;
+        }
     }
 
     private void updateSwitch(boolean enabled){
@@ -104,9 +148,11 @@ public class MainActivity extends VpnActivity {
         textSwitch.setText(enabled ? R.string.textSwitchOn : R.string.textSwitchOff);
     }
 
-    private void updateDump(boolean enabled){
+    private void periodicDump(boolean enabled){
         if(enabled){
-            dbDumper.start();
+            dbDumper.dumpFlowInfo(DbDumper.DEFAULT_INTERVAL);
+            dbDumper.dumpSensorInfo(DbDumper.DEFAULT_INTERVAL);
+            dbDumper.dumpConnectionInfo(DbDumper.DEFAULT_INTERVAL);
         }else{
             dbDumper.stop();
         }
@@ -117,7 +163,7 @@ public class MainActivity extends VpnActivity {
         super.onStateUpdated();
 
         boolean enabled = isVpnEnabled();
-        updateDump(enabled);
+        periodicDump(enabled);
         updateSwitch(enabled);
 
     }
@@ -132,9 +178,13 @@ public class MainActivity extends VpnActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.battery_menu:
-                Intent intent = new Intent(this, BatteryActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, BatteryActivity.class));
+                return true;
+            case R.id.about_menu:
+                startActivity(new Intent(this, AboutActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 }

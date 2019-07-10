@@ -5,4 +5,7 @@
     <item
         android:id="@+id/battery_menu"
         android:title="@string/battery_saving" />
+    <item
+        android:id="@+id/about_menu"
+        android:title="@string/about_amon" />
 </menu>

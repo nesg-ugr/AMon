@@ -6,6 +6,9 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.database.Cursor;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -14,6 +17,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -36,9 +40,11 @@ public class DbDumper {
     public static final long DEFAULT_INTERVAL = 60*1000; // in ms
 
     private Context mContext;
+    private HandlerThread handlerThread;
+    private Looper looper;
     private Handler restHandler;
     private Api api;
-    private DatabaseHelper dh;
+    // private DatabaseHelper dh;
 
     private Runnable flowPush;
     private Runnable flowPushPeriodic;
@@ -48,11 +54,16 @@ public class DbDumper {
     private Runnable appPushPeriodic;
     private Runnable sensorPush;
     private Runnable sensorPushPeriodic;
+    private Runnable connectionPush;
+    private Runnable getConnectionPushPeriodic;
 
 
     public DbDumper(Context context){
         mContext = context;
-        restHandler = new Handler();
+        handlerThread = new HandlerThread("DB Dumping", Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+        looper = handlerThread.getLooper();
+        restHandler = new Handler(looper);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Api.ENDPOINT)
@@ -61,12 +72,12 @@ public class DbDumper {
                 .build();
 
         api = retrofit.create(Api.class);
-        dh = DatabaseHelper.getInstance(mContext);
+        // dh = DatabaseHelper.getInstance(mContext);
 
 
     }
 
-    // Start a periodic dump of all the tasks with a default interval
+    // Start a periodic dump of some tasks with a default interval
     public void start(){
         start(DEFAULT_INTERVAL);
     }
@@ -79,6 +90,10 @@ public class DbDumper {
     // Stop all pending callbacks and messages
     public void stop(){
         restHandler.removeCallbacksAndMessages(null);
+    }
+
+    public void onDestroy(){
+        looper.quit();
     }
 
     // Async call to flowPush
@@ -176,6 +191,28 @@ public class DbDumper {
         restHandler.post(sensorPushPeriodic);
     }
 
+    public void dumpConnectionInfo(){
+        connectionPush = new Runnable() {
+            @Override
+            public void run() {
+                connectionDump();
+            }
+        };
+        restHandler.post(connectionPush);
+    }
+
+    public void dumpConnectionInfo(final long interval){
+        restHandler.removeCallbacks(getConnectionPushPeriodic);
+        getConnectionPushPeriodic = new Runnable() {
+            @Override
+            public void run() {
+                connectionDump();
+                restHandler.postDelayed(this, interval);
+            }
+        };
+        restHandler.post(getConnectionPushPeriodic);
+    }
+
     public void flowDump(){
         final long now = Calendar.getInstance().getTimeInMillis();
         List<Flow_> flows = new ArrayList<>();
@@ -215,8 +252,8 @@ public class DbDumper {
             }
         }
         */
-        LinkedBlockingQueue<eu.faircode.netguard.Flow> flowQueue = ServiceSinkhole.getQueue();
-        ArrayList<eu.faircode.netguard.Flow> tempFlows = new ArrayList<>();
+        final LinkedBlockingQueue<eu.faircode.netguard.Flow> flowQueue = ServiceSinkhole.getQueue();
+        final ArrayList<eu.faircode.netguard.Flow> tempFlows = new ArrayList<>();
         if (flowQueue.isEmpty()){
             Log.d(TAG, "There's no flow entry to send");
             return;
@@ -256,9 +293,11 @@ public class DbDumper {
                             if (response.isSuccessful()) {
                                 Log.i(TAG, "Successful compact flows POST");
                                 // Remove everything
-                                dh.safeCleanupFlow(now);
+                                // dh.safeCleanupFlow(now);
                                 // Remove only finished flows
                                 // dh.cleanupFinishedFlow(now);
+
+                                flowQueue.addAll(tempFlows);
                             } else {
                                 Log.w(TAG, "Failed to POST compact flows");
                             }
@@ -289,9 +328,12 @@ public class DbDumper {
                             if (response.isSuccessful()) {
                                 Log.i(TAG, "Successful flows POST");
                                 // Remove everything
-                                dh.safeCleanupFlow(now);
+                                // dh.safeCleanupFlow(now);
                                 // Remove only finished flows
                                 // dh.cleanupFinishedFlow(now);
+
+                                flowQueue.addAll(tempFlows);
+
                             } else {
                                 Log.w(TAG, "Failed to POST flows");
                             }
@@ -467,6 +509,48 @@ public class DbDumper {
                     @Override
                     public void onError(Throwable e) {
                         Log.e(TAG,"Error in sensor POST",e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    private void connectionDump(){
+        
+        List<Wifi> wifiList = new ArrayList<>();
+        for (Map.Entry<String, String> entry:
+                es.ugr.mdsm.deviceInfo.Connection.configuredWifiList(mContext).entrySet()) {
+            wifiList.add(new Wifi(entry.getKey(), entry.getValue()));
+        }
+        
+        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, es.ugr.mdsm.deviceInfo.Connection.bluetoothBoundedDevices());
+
+        // Post connection
+        api.postConnection(connection)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<Void>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response response) {
+                        if(response.isSuccessful()){
+                            Log.i(TAG, "Successful connection POST");
+                        }else{
+                            Log.w(TAG, "Failed to POST connection");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG,"Error in connection POST",e);
                     }
 
                     @Override

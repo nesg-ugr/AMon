@@ -45,6 +45,11 @@
             android:parentActivityName="es.ugr.mdsm.amon.MainActivity">
         </activity>
 
+        <activity
+            android:name="es.ugr.mdsm.amon.AboutActivity"
+            android:parentActivityName="es.ugr.mdsm.amon.MainActivity">
+        </activity>
+
         <meta-data
             android:name="android.max_aspect"
             android:value="2.1" />

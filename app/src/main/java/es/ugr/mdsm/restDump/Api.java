@@ -22,4 +22,7 @@ public interface Api {
     @POST("sensor")
     Observable<Response<Void>> postSensor(@Body Sensor sensor);
 
+    @POST("connection")
+    Observable<Response<Void>> postConnection(@Body Connection connection);
+
 }

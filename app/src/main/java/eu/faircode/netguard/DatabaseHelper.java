@@ -162,8 +162,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createTableDns(db);
         createTableForward(db);
         createTableApp(db);         // Populated en Rule.187
-        createTableFlow(db);
-        addTriggers(db);
+        // createTableFlow(db);
+        // addTriggers(db);
     }
 
     @Override

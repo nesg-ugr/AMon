@@ -171,7 +171,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     //private volatile StatsHandler statsHandler;
 
     private List<Flow> flowBuffer = new ArrayList<>();
-    private static LinkedBlockingQueue<Flow> flowQueue = new LinkedBlockingQueue<>();
+    private static LinkedBlockingQueue<Flow> flowQueue = new LinkedBlockingQueue<>(1000);
 
     private static final int NOTIFY_ENFORCING = 1;
     private static final int NOTIFY_WAITING = 2;
@@ -629,7 +629,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
 
                 SharedPreferences prefs = ServiceSinkhole.this.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 if (prefs.getBoolean("show_stats", false)) {
-                    startForeground(NOTIFY_WAITING, getWaitingNotification());
+                    //startForeground(NOTIFY_WAITING, getWaitingNotification());
                     state = State.waiting;
                     Log.d(TAG, "Start foreground state=" + state.toString());
 //                } else {
@@ -810,12 +810,16 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                         flow.DAddr = flow.DAddr.substring(0, flow.DAddr.lastIndexOf(".")+1) + "0";
                     }
 
-                    DatabaseHelper dh = DatabaseHelper.getInstance(ServiceSinkhole.this);
                     Log.i(TAG, "Collected flow " + flow);
 
-                    flowQueue.add(flow);
+                    if(!flowQueue.offer(flow)){
+                        Log.d(TAG, "Flow queue is full");
+                    }
+                    // Log.i(TAG, "Flow queue has "+flowQueue.size()+ " elements");
 
                     /*
+                    DatabaseHelper dh = DatabaseHelper.getInstance(ServiceSinkhole.this);
+
                     flowBuffer.add(flow);
 
                     if (last_insert == 0) {
@@ -2547,7 +2551,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
             if (state == State.enforcing)
                 startForeground(NOTIFY_ENFORCING, getEnforcingNotification(-1, -1, -1));
             else if (state != State.none)
-                startForeground(NOTIFY_WAITING, getWaitingNotification());
+                //startForeground(NOTIFY_WAITING, getWaitingNotification());
             Log.d(TAG, "Start foreground state=" + state.toString());
         }
     }
@@ -2557,7 +2561,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         if (state == State.enforcing)
             startForeground(NOTIFY_ENFORCING, getEnforcingNotification(-1, -1, -1));
         else
-            startForeground(NOTIFY_WAITING, getWaitingNotification());
+            //startForeground(NOTIFY_WAITING, getWaitingNotification());
 
         Log.i(TAG, "Received " + intent);
         Util.logExtras(intent);
@@ -2819,12 +2823,12 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         TypedValue tv = new TypedValue();
         getTheme().resolveAttribute(R.attr.colorPrimary, tv, true);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "foreground");
-        /*builder.setSmallIcon(R.drawable.ic_security_white_24dp)
+        builder.setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pi)
                 .setColor(tv.data)
                 .setOngoing(true)
                 .setAutoCancel(false);
-        */
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             builder.setContentTitle(getString(R.string.msg_waiting));
         else
@@ -2845,14 +2849,14 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         TypedValue tv = new TypedValue();
         //getTheme().resolveAttribute(R.attr.colorOff, tv, true);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "notify");
-        /*builder.setSmallIcon(R.drawable.ic_error_white_24dp)
+        builder.setSmallIcon(R.drawable.ic_block_black_24dp)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.msg_revoked))
                 .setContentIntent(pi)
                 .setColor(tv.data)
                 .setOngoing(false)
                 .setAutoCancel(true);
-*/
+
         builder.setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setVisibility(NotificationCompat.VISIBILITY_SECRET);
 
@@ -2894,14 +2898,14 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         TypedValue tv = new TypedValue();
         //getTheme().resolveAttribute(R.attr.colorOff, tv, true);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "notify");
-        /*builder.setSmallIcon(R.drawable.ic_error_white_24dp)
+        builder.setSmallIcon(R.drawable.ic_error_outline_black_24dp)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.msg_error, message))
                 .setContentIntent(pi)
                 .setColor(tv.data)
                 .setOngoing(false)
                 .setAutoCancel(true);
-        */
+
         builder.setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setVisibility(NotificationCompat.VISIBILITY_SECRET);
 
