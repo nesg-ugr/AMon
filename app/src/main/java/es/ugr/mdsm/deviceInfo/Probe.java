@@ -36,9 +36,10 @@ public class Probe {
         return batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
     }
 
+    // https://stackoverflow.com/a/46736648
     public static double batteryCapacity(Context context) {
         Object mPowerProfile;
-        double batteryCapacity = 0;
+        double batteryCapacity;
         final String POWER_PROFILE_CLASS = "com.android.internal.os.PowerProfile";
 
         try {
@@ -60,21 +61,20 @@ public class Probe {
 
     }
 
-    // Return ram value in bytes
+    // Return ram value in MB
     public static long ramUsage(Context context){
         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
         activityManager.getMemoryInfo(memoryInfo);
-        return memoryInfo.availMem;
+        return (memoryInfo.totalMem - memoryInfo.availMem)/1024/1024;
     }
 
-    // Supported up to 26, not included
-    // Return ram value in bytes
+    // Return ram value in MB
     public static long ramTotal(Context context){
         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
         activityManager.getMemoryInfo(memoryInfo);
-        return memoryInfo.totalMem;
+        return memoryInfo.totalMem/1024/1024;
     }
     public static int numCpuCores() {
 
