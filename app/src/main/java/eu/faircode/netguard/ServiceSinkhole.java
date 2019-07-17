@@ -117,6 +117,7 @@ import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import es.ugr.mdsm.amon.MainActivity;
+import es.ugr.mdsm.amon.R;
 import es.ugr.mdsm.deviceInfo.Networking;
 import es.ugr.mdsm.deviceInfo.Software;
 
