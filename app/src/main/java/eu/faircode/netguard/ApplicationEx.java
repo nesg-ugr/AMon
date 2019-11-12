@@ -28,6 +28,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
+import es.ugr.mdsm.amon.R;
+
 public class ApplicationEx extends Application {
     private static final String TAG = "NetGuard.App";
 

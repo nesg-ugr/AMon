@@ -71,7 +71,7 @@
 #define SOCKS5_CONNECT 4
 #define SOCKS5_CONNECTED 5
 
-#define ACTIVE_FLOW_LIFETIME 20000 // milliseconds
+#define ACTIVE_FLOW_LIFETIME 60000 // milliseconds
 
 struct context {
     pthread_mutex_t lock;

@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import es.ugr.mdsm.amon.R;
+
 public class Rule {
     private static final String TAG = "NetGuard.Rule";
 

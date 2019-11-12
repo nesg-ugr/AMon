@@ -20,6 +20,10 @@
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
 
+#AMon
+-keepnames class es.ugr.mdsm.amon.** { *; }
+-keep class es.ugr.mdsm.amon.Version { *; }
+
 #NetGuard
 -keepnames class eu.faircode.netguard.** { *; }
 
@@ -60,3 +64,4 @@
 
 #AdMob
 -dontwarn com.google.android.gms.internal.**
+

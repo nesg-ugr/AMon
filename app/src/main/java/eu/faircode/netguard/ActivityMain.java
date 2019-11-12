@@ -58,6 +58,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import es.ugr.mdsm.amon.R;
 import es.ugr.mdsm.deviceInfo.Connection;
 import es.ugr.mdsm.restDump.DbDumper;
 

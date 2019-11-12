@@ -16,10 +16,15 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
 
 import es.ugr.mdsm.deviceInfo.VpnActivity;
 import es.ugr.mdsm.restDump.DbDumper;
-import eu.faircode.netguard.R;
 
 public class MainActivity extends VpnActivity {
 
@@ -33,8 +38,14 @@ public class MainActivity extends VpnActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        Update.createNotificationChannel(this);
+
+        //Check for updates
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class,24,TimeUnit.HOURS).build();
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("updateWorker", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
 
         setupVpn(MODE_FLOW);
+        anonymizeData(true);
 
         dbDumper = new DbDumper(this);
 

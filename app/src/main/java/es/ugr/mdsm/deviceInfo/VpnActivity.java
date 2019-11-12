@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import eu.faircode.netguard.R;
+import es.ugr.mdsm.amon.R;
 import eu.faircode.netguard.ServiceSinkhole;
 import eu.faircode.netguard.Util;
 
@@ -55,7 +55,7 @@ public class VpnActivity extends AppCompatActivity {
             Log.i(TAG, "Always-on=" + alwaysOn);
             if (!TextUtils.isEmpty(alwaysOn))
                 if (getPackageName().equals(alwaysOn)) {
-                    if (prefs.getBoolean("filter", false)) {
+                    if (isFiltering()) {
                         int lockdown = Settings.Secure.getInt(getContentResolver(), "always_on_vpn_lockdown", 0);
                         Log.i(TAG, "Lockdown=" + lockdown);
                         if (lockdown != 0) {
@@ -84,53 +84,55 @@ public class VpnActivity extends AppCompatActivity {
                     onActivityResult(REQUEST_VPN, RESULT_OK, null);
                 } else {
                     // Show dialog
-                    LayoutInflater inflater = LayoutInflater.from(this);
-                    View view = inflater.inflate(R.layout.vpn, null, false);
-                    dialogVpn = new AlertDialog.Builder(this)
-                            .setView(view)
-                            .setCancelable(false)
-                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Log.i(TAG, "Start intent=" + prepare);
-                                    try {
-                                        // com.android.vpndialogs.ConfirmDialog required
-                                        startActivityForResult(prepare, REQUEST_VPN);
-                                    } catch (Throwable ex) {
-                                        Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-                                        onActivityResult(REQUEST_VPN, RESULT_CANCELED, null);
-                                        prefs.edit().putBoolean("enabled", false).apply();
-                                        onStateUpdated();
-                                    }
-
-                                }
-                            })
-                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                @Override
-                                public void onDismiss(DialogInterface dialogInterface) {
-                                    dialogVpn = null;
-                                }
-                            })
-                            .create();
-                    dialogVpn.show();
+                    showDialog(prepare);
                 }
             } catch (Throwable ex) {
                 // Prepare failed
                 Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-                prefs.edit().putBoolean("enabled", false).apply();
+                enabledVpn(false);
                 onStateUpdated();
             }
 
         } else{
             ServiceSinkhole.stop("switch off", this, false);
-            prefs.edit().putBoolean("enabled", false).apply();
+            enabledVpn(false);
             onStateUpdated();
         }
     }
 
-    public boolean isVpnEnabled(){
-        return prefs.getBoolean("enabled",false);
+    // Do the VPN request by a dialog
+    private void showDialog(final Intent prepare) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.vpn, null, false);
+        dialogVpn = new AlertDialog.Builder(this)
+                .setView(view)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.i(TAG, "Start intent=" + prepare);
+                        try {
+                            // com.android.vpndialogs.ConfirmDialog required
+                            startActivityForResult(prepare, REQUEST_VPN);
+                        } catch (Throwable ex) {
+                            Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
+                            onActivityResult(REQUEST_VPN, RESULT_CANCELED, null);
+                            enabledVpn(false);
+                            onStateUpdated();
+                        }
+
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        dialogVpn = null;
+                    }
+                })
+                .create();
+        dialogVpn.show();
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
@@ -139,9 +141,9 @@ public class VpnActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_VPN) {
             // Handle VpnActivity approval
-            prefs.edit().putBoolean("enabled", resultCode == RESULT_OK).apply();
+            enabledVpn(resultCode == RESULT_OK);
             onStateUpdated();
-            prefs.edit().putBoolean("filter", true).apply();
+            filter(true);
             if (resultCode == RESULT_OK) {
                 ServiceSinkhole.start("prepared", this);
 
@@ -200,6 +202,24 @@ public class VpnActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    public boolean isVpnEnabled(){
+        return prefs.getBoolean("enabled",false);
+    }
+
+    // Only for private usage. For user usage check activateVpn()
+    private void enabledVpn(boolean enabled){
+        prefs.edit().putBoolean("enabled", enabled).apply();
+    }
+
+    public boolean isFiltering(){
+        return prefs.getBoolean("filter",false);
+    }
+
+    public void filter(boolean filtered){
+        prefs.edit().putBoolean("filter", filtered).apply();
+
+    }
+
     public boolean isNetworkLocked(){
         return prefs.getBoolean("lockdown",false);
     }
@@ -207,7 +227,6 @@ public class VpnActivity extends AppCompatActivity {
     public void lockNetwork(boolean locked){
         prefs.edit().putBoolean("lockdown",locked).apply();
         ServiceSinkhole.reload("changed lockdown", this, false);
-        //WidgetLockdown.updateWidgets(this);
     }
 
     public boolean isLogging(){

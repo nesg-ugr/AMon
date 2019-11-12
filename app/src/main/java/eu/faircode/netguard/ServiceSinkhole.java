@@ -808,7 +808,8 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
 
                     boolean anonymize = prefs.getBoolean("anonymizeApp", false);
                     if(anonymize){
-                        flow.DAddr = flow.DAddr.substring(0, flow.DAddr.lastIndexOf(".")+1) + "0";
+                        flow.SAddr = "0.0.0.0";
+                        //flow.DAddr = flow.DAddr.substring(0, flow.DAddr.lastIndexOf(".")+1) + "0";
                     }
 
                     Log.i(TAG, "Collected flow " + flow);

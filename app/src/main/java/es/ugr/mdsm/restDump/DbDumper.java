@@ -297,9 +297,9 @@ public class DbDumper {
                                 // Remove only finished flows
                                 // dh.cleanupFinishedFlow(now);
 
-                                flowQueue.addAll(tempFlows);
                             } else {
                                 Log.w(TAG, "Failed to POST compact flows");
+                                flowQueue.addAll(tempFlows);
                             }
                         }
 
@@ -332,10 +332,10 @@ public class DbDumper {
                                 // Remove only finished flows
                                 // dh.cleanupFinishedFlow(now);
 
-                                flowQueue.addAll(tempFlows);
 
                             } else {
                                 Log.w(TAG, "Failed to POST flows");
+                                flowQueue.addAll(tempFlows);
                             }
 
                         }

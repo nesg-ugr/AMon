@@ -5,7 +5,6 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import eu.faircode.netguard.R;
 
 public class AboutActivity extends AppCompatActivity {
 

@@ -39,7 +39,8 @@ public class Util {
     public static String anonymizeApp(Context context, String input){
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean anonymize = prefs.getBoolean("anonymizeApp", false);
-        if(anonymize){
+        //if(anonymize){
+        if(false){
             try {
                 return eu.faircode.netguard.Util.md5(input,"");
             } catch (Exception e) {

@@ -5,7 +5,8 @@
         \n\nAMon recopilirá información no confidencial de tu dispositivo para incrementar la seguridad de los dispositivos móviles.
         \n\nToda la información será enviada a un servidor remoto para su posterior estudio.</string>
     <string name="app_android">AMon requiere Android 6.0 o superior</string>
-    <string name="app_first">AMon recogerá información no confidencial de tu dispositivo para apoyar al proyecto de investigación MDSM.   Se puede encontrar más información sobre los datos recogidos en <a href="https://mdsm1.ugr.es/static/es/gathered_data.html">https://mdsm1.ugr.es/static/es/gathered_data</a>.   AMon se ejecutará en segundo plano tras su activación y no mermará la experiencia de usuario.</string>
+    <string name="app_first">AMon recogerá información no confidencial de tu dispositivo para apoyar al proyecto de investigación MDSM.  Se puede encontrar más información sobre los datos recogidos y su funcionamiento en este <a href="https://nesg.ugr.es/mdsm/downloads/detallesAMon.pdf">enlace</a>.   AMon se ejecutará en segundo plano tras su activación y no mermará la experiencia de usuario.
+        \n\nPara continuar debe aceptar los <a href="https://nesg.ugr.es/mdsm/downloads/TerminosUso.pdf">Términos de Uso</a></string>
     <string name="app_agree">Aceptar</string>
     <string name="app_disagree">Rechazar</string>
     <string name="channel_foreground">Servicios en ejecución</string>
@@ -56,4 +57,6 @@
 \n\nSiga los pasos propuestos en la siguiente pantalla para deshabilitar la optimización de batería.
 \n\nEste menú está accesible desde el menú de la pantalla prinicipal.</string>
     <string name="about_amon">Sobre AMon</string>
+    <string name="channel_update">Notificaciones de actualizaciones</string>
+    <string name="update_msg">Una nueva versión está disponible</string>
 </resources>

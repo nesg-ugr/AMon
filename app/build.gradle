@@ -56,8 +56,6 @@ android {
             proguardFiles.add(file('proguard-rules.pro'))
             signingConfig signingConfigs.release
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "false"
-            // buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
-            // buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
         }
         play {
             minifyEnabled = true
@@ -65,16 +63,12 @@ android {
             signingConfig signingConfigs.release
             proguardFiles.add(file('proguard-rules.pro'))
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "true"
-            // buildConfigField "String", "HOSTS_FILE_URI", "\"\""
-            // buildConfigField "String", "GITHUB_LATEST_API", "\"\""
         }
         debug {
             minifyEnabled = true
             useProguard = true
             proguardFiles.add(file('proguard-rules.pro'))
             buildConfigField "boolean", "PLAY_STORE_RELEASE", "false"
-            // buildConfigField "String", "HOSTS_FILE_URI", "\"http://www.netguard.me/hosts\""
-            // buildConfigField "String", "GITHUB_LATEST_API", "\"https://api.github.com/repos/M66B/NetGuard/releases/latest\""
         }
     }
 }
@@ -95,5 +89,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
     implementation 'com.scottyab:rootbeer-lib:0.0.7'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    implementation "androidx.work:work-runtime:2.2.0"
 
 }

@@ -5,7 +5,8 @@
         \n\nAMon will gather non-sensitive information from your device to mobile devices security.
         \n\nAll the information will be sent to a remote server for future study.</string>
     <string name="app_android">AMon requires Android 6.0 or later</string>
-    <string name="app_first">AMon will gather non-sensitive data from your device to support the investigation project MDSM.   More information related to the gathered data can be found in <a href="https://mdsm1.ugr.es/static/en/gathered_data.html">https://mdsm1.ugr.es/static/en/gathered_data.html</a>.   AMon will be running in background after its activation and won\'t disturb the user experience.</string>
+    <string name="app_first">AMon will gather non-sensitive data from your device to support the investigation project MDSM.  More information related to the gathered data and its functionality can be found in this <a href="https://nesg.ugr.es/mdsm/downloads/detallesAMon.pdf">link</a>.   AMon will be running in background after its activation and won\'t disturb the user experience.
+        \n\nIn order to continue you must accept the <a href="https://nesg.ugr.es/mdsm/downloads/TerminosUso.pdf">Terms of use</a></string>
     <string name="app_agree">I agree</string>
     <string name="app_disagree">I disagree</string>
     <string name="channel_foreground">Running services</string>
@@ -47,7 +48,7 @@
     <string name="step_description_batterySaving">Select \"Battery Saving\" and choose \"No restrictions\"</string>
     <string name="step_description_autostart">Check \"Autostart\" toggle</string>
     <string name="step_description_lock">Open the Recent screen (also known as Recent Apps or Recent Task List). Then, lock AMon swiping or long pressing on it and pressing the lock icon. (This last step can vary between Android versions)</string>
-    <string name="step_doze">Allow AMon to ignore batttert optimizations.</string>
+    <string name="step_doze">Allow AMon to ignore battery optimizations.</string>
     <string name="step_data">Enable \"Background data\".</string>
     <string name="amon_help">To switch AMon state, click on the logo.</string>
     <string name="step_no">All the battery saving changes have been done.</string>
@@ -58,4 +59,6 @@
 \n\nFollow the proposed steps in the next screen to disable battery optimization.
 \n\nThis menu can be accessed later by the menu shown in the main screen.</string>
     <string name="about_amon">About AMon</string>
+    <string name="channel_update">Update notifications</string>
+    <string name="update_msg">A new version is available</string>
 </resources>
