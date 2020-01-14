@@ -15,6 +15,7 @@ public class Networking {
 
     private static final String TAG = "DeviceInfo.Networking";
 
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     public static String getNetworkAddress(Context context){
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

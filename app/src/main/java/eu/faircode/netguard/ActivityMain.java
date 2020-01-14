@@ -30,7 +30,6 @@ import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -56,10 +55,8 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import es.ugr.mdsm.amon.R;
-import es.ugr.mdsm.deviceInfo.Connection;
 import es.ugr.mdsm.restDump.DbDumper;
 
 public class ActivityMain extends AppCompatActivity {
@@ -162,7 +159,7 @@ public class ActivityMain extends AppCompatActivity {
 
         once();
 
-        // Connection.bluetoothBoundedDevices();
+        // Connection.bluetoothBondedDevices();
 
         /*if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION);

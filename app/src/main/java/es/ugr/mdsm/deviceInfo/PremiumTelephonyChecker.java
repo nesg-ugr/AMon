@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.util.Date;
 
+// WIP
 public class PremiumTelephonyChecker {
 
     private static final String TAG = "DeviceInfo.PremiumCheck";

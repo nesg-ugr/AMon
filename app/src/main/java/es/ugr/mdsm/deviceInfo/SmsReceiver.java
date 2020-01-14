@@ -3,9 +3,9 @@ package es.ugr.mdsm.deviceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.provider.Telephony;
-import android.telephony.TelephonyManager;
+
+// WIP
 
 public class SmsReceiver extends BroadcastReceiver {
 

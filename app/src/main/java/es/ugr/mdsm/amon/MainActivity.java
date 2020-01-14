@@ -20,7 +20,6 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 import es.ugr.mdsm.deviceInfo.VpnActivity;
@@ -39,6 +38,9 @@ public class MainActivity extends VpnActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         Update.createNotificationChannel(this);
+
+        //Document doc = ManifestParser.extractManifest(Software.getInstalledApplication(this).get(0));
+        // Connection.bluetoothBondedDevices();
 
         //Check for updates
         PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class,24,TimeUnit.HOURS).build();

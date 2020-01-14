@@ -23,11 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.preference.PreferenceManager;
 import android.util.Log;
-
-import java.util.Map;
 
 public class ReceiverAutostart extends BroadcastReceiver {
     private static final String TAG = "NetGuard.Receiver";

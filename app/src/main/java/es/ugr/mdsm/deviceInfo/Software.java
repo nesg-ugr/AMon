@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import es.ugr.mdsm.restDump.Connectivity;
 import es.ugr.mdsm.restDump.Util;
 
 public class Software {

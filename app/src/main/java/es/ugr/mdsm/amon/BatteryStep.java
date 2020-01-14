@@ -1,9 +1,6 @@
 package es.ugr.mdsm.amon;
 
-import android.os.Build;
 import android.view.View;
-
-import java.util.ArrayList;
 
 public class BatteryStep {
 

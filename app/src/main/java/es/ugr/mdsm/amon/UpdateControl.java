@@ -2,7 +2,6 @@ package es.ugr.mdsm.amon;
 
 import io.reactivex.Observable;
 import retrofit2.Response;
-import retrofit2.http.Body;
 import retrofit2.http.GET;
 
 public interface UpdateControl {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Handler;
-import android.database.Cursor;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
@@ -18,12 +17,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import es.ugr.mdsm.deviceInfo.Probe;
 import es.ugr.mdsm.deviceInfo.Software;
-import eu.faircode.netguard.DatabaseHelper;
 import eu.faircode.netguard.ServiceSinkhole;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -527,7 +524,7 @@ public class DbDumper {
             wifiList.add(new Wifi(entry.getKey(), entry.getValue()));
         }
         
-        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, es.ugr.mdsm.deviceInfo.Connection.bluetoothBoundedDevices());
+        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, es.ugr.mdsm.deviceInfo.Connection.bluetoothBondedDevices());
 
         // Post connection
         api.postConnection(connection)

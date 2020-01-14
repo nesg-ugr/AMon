@@ -22,6 +22,7 @@
 
 #AMon
 -keepnames class es.ugr.mdsm.amon.** { *; }
+-keep class es.ugr.mdsm.deviceInfo.** { *; }
 -keep class es.ugr.mdsm.amon.Version { *; }
 
 #NetGuard

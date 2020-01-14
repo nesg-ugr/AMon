@@ -195,6 +195,10 @@ public class Probe {
         }
     }
 
+    public static boolean isRoamingEnabled(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(), Settings.Global.DATA_ROAMING, 0) == 1;
+    }
+
     public static boolean isGpsEnabled(Context context){
         return ((LocationManager) context.getSystemService(Context.LOCATION_SERVICE)).isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
