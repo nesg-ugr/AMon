@@ -44,7 +44,7 @@
     <string name="go">Ir</string>
     <string name="step">Paso %1$d</string>
     <string name="step_description_batterySaving">Selecciona \"Ahorro de batería\" y elige \"Sin Restricciones\"</string>
-    <string name="step_description_autostart">Activa \"Inicio automático\"</string>
+    <string name="step_description_autostart">Comprueba \"Inicio automático\"</string>
     <string name="step_description_lock">Abre la pantalla de Recientes (también conocida como aplicaciones recientes o lista de tareas recientes). Tras esto, fija AMon deslizando o con una pulsación larga sobre él y pulsa el icono del candado.</string>
     <string name="step_doze">Permite a AMon ignorar las optimizaciones de batería.</string>
     <string name="step_data">Habilita \"Conexiones automáticas\"</string>
@@ -59,4 +59,6 @@
     <string name="about_amon">Sobre AMon</string>
     <string name="channel_update">Notificaciones de actualizaciones</string>
     <string name="update_msg">Una nueva versión está disponible</string>
+    <string name="step_still"><b>Nota:</b> Dado que la aplicación no puede comprobar todos los cambios realizados, algunos pueden haberse realizado y aun así mostrarse.</string>
+    <string name="step_description_more">(Eng) Optimizaciones según el fabricante.</string>
 </resources>

@@ -58,7 +58,7 @@
     <string name="go">Go</string>
     <string name="step">Step %1$d</string>
     <string name="step_description_batterySaving">Select \"Battery Saving\" and choose \"No restrictions\"</string>
-    <string name="step_description_autostart">Check \"Autostart\" toggle</string>
+    <string name="step_description_autostart">Check \"Autostart\"</string>
     <string name="step_description_lock">Open the Recent screen (also known as Recent Apps or Recent Task List). Then, lock AMon swiping or long pressing on it and pressing the lock icon. (This last step can vary between Android versions)</string>
     <string name="step_doze">Allow AMon to ignore battery optimizations.</string>
     <string name="step_data">Enable \"Background data\".</string>
@@ -73,5 +73,7 @@
     <string name="about_amon">About AMon</string>
     <string name="channel_update">Update notifications</string>
     <string name="update_msg">A new version is available</string>
+    <string name="step_still"><b>Note:</b> Since the application cannot check all the changes made, some steps may have been done and still be shown here.</string>
+    <string name="step_description_more">Optimization according to the manufacturer.</string>
 
 </resources>
