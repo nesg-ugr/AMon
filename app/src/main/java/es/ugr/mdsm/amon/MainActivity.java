@@ -3,6 +3,7 @@ package es.ugr.mdsm.amon;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -20,8 +21,10 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import es.ugr.mdsm.deviceInfo.Rule;
 import es.ugr.mdsm.deviceInfo.VpnActivity;
 import es.ugr.mdsm.restDump.DbDumper;
 
@@ -37,22 +40,22 @@ public class MainActivity extends VpnActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        imgSwitch = findViewById(R.id.swEnabled);
+        textSwitch = findViewById(R.id.textEnabled);
         Update.createNotificationChannel(this);
 
         //Document doc = ManifestParser.extractManifest(Software.getInstalledApplication(this).get(0));
         // Connection.bluetoothBondedDevices();
 
-        //Check for updates
+        // Check for updates
         PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class,24,TimeUnit.HOURS).build();
         WorkManager.getInstance(this).enqueueUniquePeriodicWork("updateWorker", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
 
+        // Activate VPN and dumping
         setupVpn(MODE_FLOW);
         anonymizeData(true);
 
         dbDumper = new DbDumper(this);
-
-        imgSwitch = findViewById(R.id.swEnabled);
-        textSwitch = findViewById(R.id.textEnabled);
 
         activateVpn(true);
         setWatchdog(5);
@@ -64,6 +67,24 @@ public class MainActivity extends VpnActivity {
         dbDumper.dumpAppInfo();
         updateSwitch(enabled);
 
+        /*
+        // Manage Firewall
+        try {
+            clearRules();
+            int appId = getPackageManager().getApplicationInfo("com.android.chrome", 0).uid;
+            ArrayList<Rule> rules = new ArrayList<>();
+            rules.add(new Rule(4, Rule.TCP, "www.google.com", 443, appId, true));
+            addRule(rules);
+            filter(true);
+            whitelistFilter(true);
+            loadRules();
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        */
+
+        // Update UI
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,6 +95,7 @@ public class MainActivity extends VpnActivity {
         imgSwitch.setOnClickListener(listener);
         textSwitch.setOnClickListener(listener);
 
+        // Handle battery optimizations
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean initialized = prefs.getBoolean("initialized", false);
 
@@ -105,6 +127,8 @@ public class MainActivity extends VpnActivity {
                     .create();
         }
 
+
+        // Show first time dialog
         if(!initialized){
             LayoutInflater inflater = LayoutInflater.from(this);
             View view = inflater.inflate(R.layout.first, null, false);

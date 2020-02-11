@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -18,7 +19,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import es.ugr.mdsm.amon.R;
+import eu.faircode.netguard.DatabaseHelper;
+import eu.faircode.netguard.Packet;
 import eu.faircode.netguard.ServiceSinkhole;
 import eu.faircode.netguard.Util;
 
@@ -26,6 +32,7 @@ import eu.faircode.netguard.Util;
 public class VpnActivity extends AppCompatActivity {
     public final static int MODE_FLOW = 0;
     private static final int REQUEST_VPN = 1;
+
     private final static String TAG = "MDSM.VpnActivity";
     private SharedPreferences prefs;
     private AlertDialog dialogVpn = null;
@@ -202,6 +209,51 @@ public class VpnActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+
+
+    public List<Rule> getRules(){
+        Cursor cursor = DatabaseHelper.getInstance(this).getAccess();
+        List<Rule> rules = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            rules.add(new Rule(
+                    cursor.getInt(cursor.getColumnIndex("version")),
+                    cursor.getInt(cursor.getColumnIndex("protocol")),
+                    cursor.getString(cursor.getColumnIndex("daddr")),
+                    cursor.getInt(cursor.getColumnIndex("dport")),
+                    cursor.getInt(cursor.getColumnIndex("uid")),
+                    cursor.getInt(cursor.getColumnIndex("block")) != 0
+            ));
+        }
+        return rules;
+    }
+
+    public void addRule(List<Rule> rules) {
+        DatabaseHelper dh = DatabaseHelper.getInstance(this);
+        for (Rule rule : rules){
+            Packet craftedPacket = new Packet();
+            craftedPacket.time = System.currentTimeMillis();
+            craftedPacket.allowed = prefs.getBoolean("whitelist_filter", false) == rule.blocked;
+            craftedPacket.uid = rule.uid;
+            craftedPacket.version = rule.version;
+            craftedPacket.protocol = rule.protocol;
+            craftedPacket.daddr = rule.daddr;
+            craftedPacket.dport = rule.dport;
+
+            dh.updateAccess(craftedPacket, null, rule.blocked ? 1 : -1);
+            //long id = dh.getAccess(rule.appId) // application id
+            //dh.setAccess(id, 1);
+        }
+
+    }
+
+    public void clearRules() {
+        DatabaseHelper.getInstance(this).clearAccess();
+    }
+
+    public void loadRules() {
+        ServiceSinkhole.reload("loading rules", this, true);
+    }
+
     public boolean isVpnEnabled(){
         return prefs.getBoolean("enabled",false);
     }
@@ -300,6 +352,16 @@ public class VpnActivity extends AppCompatActivity {
     public void whitelistOther(boolean enabled){
         prefs.edit().putBoolean("whitelist_other", enabled).apply();
         ServiceSinkhole.reload("changed other whitelisting", this, false);
+    }
+
+    public boolean isWhitelistFilter(){
+        return isFiltering() & prefs.getBoolean("whitelist_filter",false);
+    }
+
+    // Activating the whitelist filtering the filtering rules used will ALLOW the blocked connections
+    // Being deactivated will work as expected and will DENY the blocked connections.
+    public void whitelistFilter(boolean enabled){
+        prefs.edit().putBoolean("whitelist_filter", enabled).apply();
     }
 
 

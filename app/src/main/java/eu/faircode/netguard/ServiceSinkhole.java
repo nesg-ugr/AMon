@@ -1878,7 +1878,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     // Called from native code
     private Allowed isAddressAllowed(Packet packet) {
         SharedPreferences prefs = getSharedPreferences("Vpn", Context.MODE_PRIVATE);
-
+        boolean whitelist = prefs.getBoolean("whitelist_filter", false);
         lock.readLock().lock();
 
         packet.allowed = false;
@@ -1912,7 +1912,11 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                                 Log.i(TAG, "DNS expired " + packet + " rule " + rule);
                             else {
                                 filtered = true;
-                                packet.allowed = !rule.isBlocked();
+                                if(whitelist){
+                                    packet.allowed = rule.isBlocked();
+                                }else {
+                                    packet.allowed = !rule.isBlocked();
+                                }
                                 Log.i(TAG, "Filtering " + packet +
                                         " allowed=" + packet.allowed + " rule " + rule);
                             }
@@ -1923,7 +1927,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
 
                 if (!filtered)
                     if (mapUidAllowed.containsKey(packet.uid))
-                        packet.allowed = mapUidAllowed.get(packet.uid);
+                        packet.allowed = !whitelist && mapUidAllowed.get(packet.uid);
                     else
                         Log.w(TAG, "No rules for " + packet);
             }
