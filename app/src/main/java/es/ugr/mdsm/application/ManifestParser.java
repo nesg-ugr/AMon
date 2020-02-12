@@ -1,4 +1,4 @@
-package es.ugr.mdsm.deviceInfo;
+package es.ugr.mdsm.application;
 
 import android.content.pm.ApplicationInfo;
 import android.util.Log;

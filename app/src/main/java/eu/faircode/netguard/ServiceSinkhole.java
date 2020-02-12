@@ -88,8 +88,8 @@ import androidx.core.content.ContextCompat;
 
 import es.ugr.mdsm.amon.MainActivity;
 import es.ugr.mdsm.amon.R;
-import es.ugr.mdsm.deviceInfo.Networking;
-import es.ugr.mdsm.deviceInfo.Software;
+import es.ugr.mdsm.application.Info;
+import es.ugr.mdsm.connectivity.Networking;
 
 public class ServiceSinkhole extends VpnService implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "NetGuard.Service";
@@ -768,7 +768,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                 SharedPreferences prefs = ServiceSinkhole.this.getSharedPreferences("Vpn", Context.MODE_PRIVATE);
                 boolean collect_flow = prefs.getBoolean("collect_flow", false);
                 if(collect_flow){
-                    flow.PackageName = Software.getNameForUid(ServiceSinkhole.this, flow.Uid);
+                    flow.PackageName = Info.getNameForUid(ServiceSinkhole.this, flow.Uid);
 
                     String address = Networking.getNetworkAddress(ServiceSinkhole.this);
                     if(address != null){

@@ -1,4 +1,4 @@
-package es.ugr.mdsm.deviceInfo;
+package es.ugr.mdsm.connectivity;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class Networking {
 
-    private static final String TAG = "DeviceInfo.Networking";
+    private static final String TAG = "Connectivity.Networking";
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)

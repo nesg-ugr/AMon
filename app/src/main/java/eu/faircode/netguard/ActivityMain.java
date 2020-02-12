@@ -159,12 +159,12 @@ public class ActivityMain extends AppCompatActivity {
 
         once();
 
-        // Connection.bluetoothBondedDevices();
+        // Connection.bondedDevices();
 
         /*if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION);
         } else { // Won't be on release
-            Connection.unsecuredWifiConnection(this);
+            Connection.isCurrentConnectionUnsecure(this);
         }*/
 
         // Debug switch
@@ -390,7 +390,7 @@ public class ActivityMain extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     // TODO
-                    //Connection.unsecuredWifiConnection(this);
+                    //Connection.isCurrentConnectionUnsecure(this);
                 }
             }
         }

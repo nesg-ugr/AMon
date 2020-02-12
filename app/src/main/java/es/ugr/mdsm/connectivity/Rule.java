@@ -1,4 +1,4 @@
-package es.ugr.mdsm.deviceInfo;
+package es.ugr.mdsm.connectivity;
 
 public class Rule {
     public final static int ICMP = 1;

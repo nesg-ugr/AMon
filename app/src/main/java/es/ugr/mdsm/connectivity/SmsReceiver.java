@@ -1,4 +1,4 @@
-package es.ugr.mdsm.deviceInfo;
+package es.ugr.mdsm.connectivity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

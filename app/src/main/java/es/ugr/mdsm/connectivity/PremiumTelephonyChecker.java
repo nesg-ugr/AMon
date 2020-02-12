@@ -1,4 +1,4 @@
-package es.ugr.mdsm.deviceInfo;
+package es.ugr.mdsm.connectivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +8,9 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.util.Date;
+
+import es.ugr.mdsm.connectivity.CallReceiver;
+import es.ugr.mdsm.connectivity.SmsReceiver;
 
 // WIP
 public class PremiumTelephonyChecker {

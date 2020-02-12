@@ -3,7 +3,6 @@ package es.ugr.mdsm.amon;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -21,14 +20,12 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import es.ugr.mdsm.deviceInfo.Rule;
-import es.ugr.mdsm.deviceInfo.VpnActivity;
+import es.ugr.mdsm.connectivity.CustomVpnActivity;
 import es.ugr.mdsm.restDump.DbDumper;
 
-public class MainActivity extends VpnActivity {
+public class MainActivity extends CustomVpnActivity {
 
     private ImageButton imgSwitch;
     private TextView textSwitch;
@@ -44,8 +41,10 @@ public class MainActivity extends VpnActivity {
         textSwitch = findViewById(R.id.textEnabled);
         Update.createNotificationChannel(this);
 
-        //Document doc = ManifestParser.extractManifest(Software.getInstalledApplication(this).get(0));
-        // Connection.bluetoothBondedDevices();
+        //Document doc = ManifestParser.extractManifest(Info.getInstalledApplication(this).get(0));
+        // Bluetooth.bondedDevices();
+
+        es.ugr.mdsm.connectivity.Tethering.isUsbTetheringEnabled(this);
 
         // Check for updates
         PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class,24,TimeUnit.HOURS).build();

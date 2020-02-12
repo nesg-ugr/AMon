@@ -1,4 +1,4 @@
-package es.ugr.mdsm.deviceInfo;
+package es.ugr.mdsm.connectivity;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,11 +29,11 @@ import eu.faircode.netguard.ServiceSinkhole;
 import eu.faircode.netguard.Util;
 
 
-public class VpnActivity extends AppCompatActivity {
+public class CustomVpnActivity extends AppCompatActivity {
     public final static int MODE_FLOW = 0;
     private static final int REQUEST_VPN = 1;
 
-    private final static String TAG = "MDSM.VpnActivity";
+    private final static String TAG = "MDSM.CustomVpnActivity";
     private SharedPreferences prefs;
     private AlertDialog dialogVpn = null;
     private boolean lastState;
@@ -147,7 +147,7 @@ public class VpnActivity extends AppCompatActivity {
         Util.logExtras(data);
 
         if (requestCode == REQUEST_VPN) {
-            // Handle VpnActivity approval
+            // Handle CustomVpnActivity approval
             enabledVpn(resultCode == RESULT_OK);
             onStateUpdated();
             filter(true);

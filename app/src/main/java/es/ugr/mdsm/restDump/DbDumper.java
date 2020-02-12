@@ -19,8 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import es.ugr.mdsm.deviceInfo.Probe;
-import es.ugr.mdsm.deviceInfo.Software;
+import es.ugr.mdsm.application.Info;
+import es.ugr.mdsm.application.Permission;
+import es.ugr.mdsm.connectivity.AirplaneMode;
+import es.ugr.mdsm.connectivity.Bluetooth;
+import es.ugr.mdsm.connectivity.Location;
+import es.ugr.mdsm.connectivity.MobileData;
+import es.ugr.mdsm.ecosystem.Configuration;
+import es.ugr.mdsm.hardware.PhysicalAccess;
+import es.ugr.mdsm.hardware.Usage;
 import eu.faircode.netguard.ServiceSinkhole;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -368,7 +375,7 @@ public class DbDumper {
                         android.os.Build.TIME,
                         android.os.Build.FINGERPRINT
                 ),
-                new Specification(Probe.numCpuCores(), Probe.ramTotal(mContext), Probe.batteryCapacity(mContext)),
+                new Specification(es.ugr.mdsm.hardware.Info.numCpuCores(), es.ugr.mdsm.hardware.Info.ramTotal(mContext), es.ugr.mdsm.hardware.Info.batteryCapacity(mContext)),
                 getTimeStamp()
         );
 
@@ -409,12 +416,12 @@ public class DbDumper {
 
         List<App_> app_list = new ArrayList<>();
         for (ApplicationInfo applicationInfo :
-                Software.getInstalledApplication(mContext)) {
+                Info.getInstalledApplication(mContext)) {
             app_list.add(new App_(
                     Util.anonymizeApp(mContext, applicationInfo.packageName),
-                    Util.bitSetToBase64(Software.permissionsAsBitArray(Software.permissionsOfApp(mContext, applicationInfo))),
-                    Software.versionOfApp(mContext,applicationInfo),
-                    Software.isAutoStarted(mContext, applicationInfo)
+                    Util.bitSetToBase64(Permission.permissionsAsBitArray(Permission.permissionsOfApp(mContext, applicationInfo))),
+                    Info.versionOfApp(mContext,applicationInfo),
+                    Info.isAutoStarted(mContext, applicationInfo)
             ));
         }
         App app = new App(
@@ -461,22 +468,22 @@ public class DbDumper {
 
         Sensor sensor = new Sensor(
                 new Connectivity(
-                        Probe.isMobileDataEnabled(mContext),
-                        Probe.isWifiEnabled(mContext),
-                        Probe.isAirplaneModeEnabled(mContext),
-                        Probe.isBluetoothEnabled(),
-                        Probe.isGpsEnabled(mContext)
+                        MobileData.isEnabled(mContext),
+                        es.ugr.mdsm.connectivity.Wifi.isEnabled(mContext),
+                        AirplaneMode.isEnabled(mContext),
+                        Bluetooth.isEnabled(),
+                        Location.isGpsEnabled(mContext)
                 ),
                 new Stat(
-                        Probe.cpuUsage(),
-                        Probe.ramUsage(mContext),
-                        Probe.batteryLevel(mContext)
+                        Usage.cpuUsage(),
+                        Usage.ramUsage(mContext),
+                        Usage.batteryLevel(mContext)
                 ),
                 new Security(
-                        Software.isUnknownSourcesEnabled(mContext),
-                        Software.isDeveloperOptionsEnabled(mContext),
-                        Software.isDeviceSecure(mContext),
-                        Software.isRooted(mContext)
+                        Configuration.isUnknownSourcesEnabled(mContext),
+                        Configuration.isDeveloperOptionsEnabled(mContext),
+                        PhysicalAccess.isDeviceSecure(mContext),
+                        Configuration.isRooted(mContext)
                 ),
                 getFormattedMac(),
                 getTimeStamp()
@@ -520,11 +527,11 @@ public class DbDumper {
         
         List<Wifi> wifiList = new ArrayList<>();
         for (Map.Entry<String, String> entry:
-                es.ugr.mdsm.deviceInfo.Connection.configuredWifiList(mContext).entrySet()) {
+                es.ugr.mdsm.connectivity.Wifi.configuredNetworks(mContext).entrySet()) {
             wifiList.add(new Wifi(entry.getKey(), entry.getValue()));
         }
         
-        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, es.ugr.mdsm.deviceInfo.Connection.bluetoothBondedDevices());
+        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, Bluetooth.bondedDevices());
 
         // Post connection
         api.postConnection(connection)
