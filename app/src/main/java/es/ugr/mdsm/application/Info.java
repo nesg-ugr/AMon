@@ -50,4 +50,14 @@ public class Info {
         String[] permissions = Permission.permissionsOfApp(context, applicationInfo);
         return permissions != null && Arrays.asList(permissions).contains(Manifest.permission.RECEIVE_BOOT_COMPLETED);
     }
+
+    public static String getInstallerOfPackage(Context context, ApplicationInfo applicationInfo){
+
+        return context.getPackageManager().getInstallerPackageName(applicationInfo.packageName);
+
+    }
+
+    public static boolean isInstalledFromGooglePlay(Context context, ApplicationInfo applicationInfo){
+        return getInstallerOfPackage(context, applicationInfo).equals("com.android.vending");
+    }
 }
