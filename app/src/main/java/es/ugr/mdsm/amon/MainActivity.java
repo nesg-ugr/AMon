@@ -42,9 +42,10 @@ public class MainActivity extends CustomVpnActivity {
         Update.createNotificationChannel(this);
 
         //Document doc = ManifestParser.extractManifest(Info.getInstalledApplication(this).get(0));
-        // Bluetooth.bondedDevices();
+        // Bluetooth.getBondedDevicesByName();
 
-        es.ugr.mdsm.connectivity.Tethering.isUsbTetheringEnabled(this);
+        //es.ugr.mdsm.connectivity.Tethering.isUsbTetheringEnabled(this);
+        //List<es.ugr.mdsm.restDump.Bluetooth> list = Util.formatBluetoothList(Bluetooth.getBondedDevices());
 
         // Check for updates
         PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class,24,TimeUnit.HOURS).build();
@@ -189,6 +190,8 @@ public class MainActivity extends CustomVpnActivity {
             dbDumper.dumpFlowInfo(DbDumper.DEFAULT_INTERVAL);
             dbDumper.dumpSensorInfo(DbDumper.DEFAULT_INTERVAL);
             dbDumper.dumpConnectionInfo(DbDumper.DEFAULT_INTERVAL);
+            dbDumper.dumpAdditionalDataInfo(DbDumper.DEFAULT_INTERVAL);
+
         }else{
             dbDumper.stop();
         }

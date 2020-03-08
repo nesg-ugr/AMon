@@ -12,6 +12,10 @@ public class Usb {
 
     private final static String TAG = "Connectivity.Usb";
 
+    public static boolean isActive(Context context){
+        HashMap<String, UsbDevice> tmp = getAttachedDevices(context);
+        return getAttachedAccessories(context)!=null || (tmp!=null && !tmp.isEmpty());
+    }
 
     public static boolean hasUsbAccesoryFeature(Context context){
         PackageManager pm = context.getPackageManager();

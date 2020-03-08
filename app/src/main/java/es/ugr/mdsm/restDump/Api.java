@@ -25,4 +25,7 @@ public interface Api {
     @POST("connection")
     Observable<Response<Void>> postConnection(@Body Connection connection);
 
+    @POST("extra")
+    Observable<Response<Void>> postAdditionalData(@Body AdditionalData additionalData);
+
 }

@@ -17,6 +17,9 @@ public class Security {
     @SerializedName("rooted")
     @Expose
     private Boolean rooted;
+    @SerializedName("debugging")
+    @Expose
+    private Boolean debugging;
 
     /**
      * No args constructor for use in serialization
@@ -32,12 +35,13 @@ public class Security {
      * @param secure
      * @param unknownSources
      */
-    public Security(Boolean unknownSources, Boolean developerOptions, Boolean secure, Boolean rooted) {
+    public Security(Boolean unknownSources, Boolean developerOptions, Boolean secure, Boolean rooted, Boolean debugging) {
         super();
         this.unknownSources = unknownSources;
         this.developerOptions = developerOptions;
         this.secure = secure;
         this.rooted = rooted;
+        this.debugging = debugging;
     }
 
     public Boolean getUnknownSources() {
@@ -72,6 +76,14 @@ public class Security {
         this.rooted = rooted;
     }
 
+    public Boolean getDebugging() {
+        return debugging;
+    }
+
+    public void setDebugging(Boolean debugging) {
+        this.debugging = debugging;
+    }
+
     @Override
     public String toString() {
         return "Security{" +
@@ -79,6 +91,7 @@ public class Security {
                 ", developerOptions=" + developerOptions +
                 ", secure=" + secure +
                 ", rooted=" + rooted +
+                ", debugging=" + debugging +
                 '}';
     }
 }

@@ -25,6 +25,9 @@ import es.ugr.mdsm.connectivity.AirplaneMode;
 import es.ugr.mdsm.connectivity.Bluetooth;
 import es.ugr.mdsm.connectivity.Location;
 import es.ugr.mdsm.connectivity.MobileData;
+import es.ugr.mdsm.connectivity.NFC;
+import es.ugr.mdsm.connectivity.Usb;
+import es.ugr.mdsm.connectivity.Vpn;
 import es.ugr.mdsm.ecosystem.Configuration;
 import es.ugr.mdsm.hardware.PhysicalAccess;
 import es.ugr.mdsm.hardware.Usage;
@@ -60,6 +63,8 @@ public class DbDumper {
     private Runnable sensorPushPeriodic;
     private Runnable connectionPush;
     private Runnable getConnectionPushPeriodic;
+    private Runnable additionalDataPush;
+    private Runnable getAdditionalDataPushPeriodic;
 
 
     public DbDumper(Context context){
@@ -215,6 +220,28 @@ public class DbDumper {
             }
         };
         restHandler.post(getConnectionPushPeriodic);
+    }
+
+    public void dumpAdditionalDataInfo(){
+        additionalDataPush = new Runnable() {
+            @Override
+            public void run() {
+                additionalDataDump();
+            }
+        };
+        restHandler.post(additionalDataPush);
+    }
+
+    public void dumpAdditionalDataInfo(final long interval){
+        restHandler.removeCallbacks(getAdditionalDataPushPeriodic);
+        getAdditionalDataPushPeriodic = new Runnable() {
+            @Override
+            public void run() {
+                additionalDataDump();
+                restHandler.postDelayed(this, interval);
+            }
+        };
+        restHandler.post(getAdditionalDataPushPeriodic);
     }
 
     public void flowDump(){
@@ -421,6 +448,7 @@ public class DbDumper {
                     Util.anonymizeApp(mContext, applicationInfo.packageName),
                     Util.bitSetToBase64(Permission.permissionsAsBitArray(Permission.permissionsOfApp(mContext, applicationInfo))),
                     Info.versionOfApp(mContext,applicationInfo),
+                    Info.getInstallerOfPackage(mContext,applicationInfo),
                     Info.isAutoStarted(mContext, applicationInfo)
             ));
         }
@@ -469,10 +497,15 @@ public class DbDumper {
         Sensor sensor = new Sensor(
                 new Connectivity(
                         MobileData.isEnabled(mContext),
+                        Util.formatNetworkGeneration(MobileData.getNetworkGeneration(mContext)),
+                        MobileData.isRoamingActive(mContext),
                         es.ugr.mdsm.connectivity.Wifi.isEnabled(mContext),
                         AirplaneMode.isEnabled(mContext),
                         Bluetooth.isEnabled(),
-                        Location.isGpsEnabled(mContext)
+                        NFC.isEnabled(mContext),
+                        Location.isGpsEnabled(mContext),
+                        Vpn.isActive(mContext),
+                        Usb.isActive(mContext)
                 ),
                 new Stat(
                         Usage.cpuUsage(),
@@ -483,7 +516,8 @@ public class DbDumper {
                         Configuration.isUnknownSourcesEnabled(mContext),
                         Configuration.isDeveloperOptionsEnabled(mContext),
                         PhysicalAccess.isDeviceSecure(mContext),
-                        Configuration.isRooted(mContext)
+                        Configuration.isRooted(mContext),
+                        Configuration.isAdbEnabled(mContext)
                 ),
                 getFormattedMac(),
                 getTimeStamp()
@@ -531,7 +565,7 @@ public class DbDumper {
             wifiList.add(new Wifi(entry.getKey(), entry.getValue()));
         }
         
-        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, Bluetooth.bondedDevices());
+        Connection connection = new Connection(getFormattedMac(),getTimeStamp(), wifiList, Bluetooth.getBondedDevicesByName());
 
         // Post connection
         api.postConnection(connection)
@@ -555,6 +589,49 @@ public class DbDumper {
                     @Override
                     public void onError(Throwable e) {
                         Log.e(TAG,"Error in connection POST",e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    public void additionalDataDump(){
+
+        AdditionalData data = new AdditionalData(
+                Util.formatBluetoothList(Bluetooth.getBondedDevices()),
+                Util.getUsbList(mContext),
+                getFormattedMac(),
+                getTimeStamp()
+        );
+
+        Log.d(TAG, data.toString());
+
+        // Post sensor
+        api.postAdditionalData(data)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<Void>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response response) {
+                        if(response.isSuccessful()){
+                            Log.i(TAG, "Successful additionalData POST");
+                        }else{
+                            Log.w(TAG, "Failed to POST additionalData");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG,"Error in additionalData POST",e);
                     }
 
                     @Override

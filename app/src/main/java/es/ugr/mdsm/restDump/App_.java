@@ -14,6 +14,9 @@ public class App_ {
     @SerializedName("version")
     @Expose
     private String version;
+    @SerializedName("source")
+    @Expose
+    private String source;
     @SerializedName("autoStart")
     @Expose
     private Boolean autoStart;
@@ -32,11 +35,12 @@ public class App_ {
      * @param permissions
      * @param version
      */
-    public App_(String name, String permissions, String version, Boolean autoStart) {
+    public App_(String name, String permissions, String version, String source, Boolean autoStart) {
         super();
         this.name = name;
         this.permissions = permissions;
         this.version = version;
+        this.source = source;
         this.autoStart = autoStart;
     }
 
@@ -64,6 +68,14 @@ public class App_ {
         this.version = version;
     }
 
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
     public Boolean getAutoStart() {
         return autoStart;
     }
@@ -76,8 +88,9 @@ public class App_ {
     public String toString() {
         return "App_{" +
                 "name='" + name + '\'' +
-                ", permissions=" + permissions +
+                ", permissions='" + permissions + '\'' +
                 ", version='" + version + '\'' +
+                ", source='" + source + '\'' +
                 ", autoStart=" + autoStart +
                 '}';
     }

@@ -159,7 +159,7 @@ public class ActivityMain extends AppCompatActivity {
 
         once();
 
-        // Connection.bondedDevices();
+        // Connection.getBondedDevicesByName();
 
         /*if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION);
