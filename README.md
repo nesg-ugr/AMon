@@ -1,2 +1,2 @@
 # NetGuardLibrary
-Fork of the NetGuard project to provide a library with its functionalities.
+Android application for monitoring multidimensional features of mobile devices tomalicious behaviors.
